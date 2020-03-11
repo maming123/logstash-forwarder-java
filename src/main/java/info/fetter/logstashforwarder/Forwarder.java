@@ -25,7 +25,9 @@ import java.util.Random;
 
 import info.fetter.logstashforwarder.config.ConfigurationManager;
 import info.fetter.logstashforwarder.config.FilesSection;
+import info.fetter.logstashforwarder.protocol.KafkaClient;
 import info.fetter.logstashforwarder.protocol.LumberjackClient;
+import info.fetter.logstashforwarder.protocol.StdoutClient;
 import info.fetter.logstashforwarder.util.AdapterException;
 
 import org.apache.commons.cli.CommandLine;
@@ -110,36 +112,45 @@ public class Forwarder {
 	}
 
 	private static void connectToServer() {
-		int randomServerIndex = 0;
-		List<String> serverList = configManager.getConfig().getNetwork().getServers();
-		networkTimeout = configManager.getConfig().getNetwork().getTimeout() * 1000;
-		if(adapter != null) {
-			try {
-				adapter.close();
-			} catch(AdapterException e) {
-				logger.error("Error while closing connection to " + adapter.getServer() + ":" + adapter.getPort());
-			} finally {
-				adapter = null;
-			}
-		}
-		while(adapter == null) {
-			try {
-				randomServerIndex = random.nextInt(serverList.size());
-				String[] serverAndPort = serverList.get(randomServerIndex).split(":");
-				logger.info("Trying to connect to " + serverList.get(randomServerIndex));
-				adapter = new LumberjackClient(configManager.getConfig().getNetwork().getSslCA(),serverAndPort[0],Integer.parseInt(serverAndPort[1]), networkTimeout);
+		if (configManager.getConfig().getOutput().getStdout() != null) {
+			if (adapter == null) {
+				//adapter = new StdoutClient();
+				adapter = new KafkaClient();
 				fileReader.setAdapter(adapter);
 				inputReader.setAdapter(adapter);
-			} catch(Exception ex) {
-				if(logger.isDebugEnabled()) {
-					logger.error("Failed to connect to server " + serverList.get(randomServerIndex) + " : ", ex);
-				} else {
-					logger.error("Failed to connect to server " + serverList.get(randomServerIndex) + " : " + ex.getMessage());
-				}
+			}
+		} else {
+			int randomServerIndex = 0;
+			List<String> serverList = configManager.getConfig().getOutput().getNetwork().getServers();
+			networkTimeout = configManager.getConfig().getOutput().getNetwork().getTimeout() * 1000;
+			if (adapter != null) {
 				try {
-					Thread.sleep(networkTimeout);
-				} catch (InterruptedException e) {
-					logger.error(e.getMessage());
+					adapter.close();
+				} catch (AdapterException e) {
+					logger.error("Error while closing connection to " + adapter.getServer() + ":" + adapter.getPort());
+				} finally {
+					adapter = null;
+				}
+			}
+			while (adapter == null) {
+				try {
+					randomServerIndex = random.nextInt(serverList.size());
+					String[] serverAndPort = serverList.get(randomServerIndex).split(":");
+					logger.info("Trying to connect to " + serverList.get(randomServerIndex));
+					adapter = new LumberjackClient(configManager.getConfig().getOutput().getNetwork().getSslCA(), serverAndPort[0], Integer.parseInt(serverAndPort[1]), networkTimeout);
+					fileReader.setAdapter(adapter);
+					inputReader.setAdapter(adapter);
+				} catch (Exception ex) {
+					if (logger.isDebugEnabled()) {
+						logger.error("Failed to connect to server " + serverList.get(randomServerIndex) + " : ", ex);
+					} else {
+						logger.error("Failed to connect to server " + serverList.get(randomServerIndex) + " : " + ex.getMessage());
+					}
+					try {
+						Thread.sleep(networkTimeout);
+					} catch (InterruptedException e) {
+						logger.error(e.getMessage());
+					}
 				}
 			}
 		}

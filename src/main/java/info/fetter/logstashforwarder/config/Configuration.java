@@ -22,15 +22,15 @@ import java.util.List;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 public class Configuration {
-	private NetworkSection network;
+	private OutputSection output;
 	private List<FilesSection> files;
 
-	public NetworkSection getNetwork() {
-		return network;
+	public OutputSection getOutput() {
+		return output;
 	}
 
-	public void setNetwork(NetworkSection network) {
-		this.network = network;
+	public void setOutput(OutputSection output) {
+		this.output = output;
 	}
 
 	public List<FilesSection> getFiles() {
@@ -44,7 +44,7 @@ public class Configuration {
 	@Override
 	public String toString() {
 	     return new ToStringBuilder(this).
-	    	       append("network", network).
+	    	       append("output", output).
 	    	       append("files", files).
 	    	       toString();
 	}

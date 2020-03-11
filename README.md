@@ -7,13 +7,13 @@ Here are a few features of this program :
   - compatible with Java 5 runtime
   - lightweight : package size is ~2MB and memory footprint ~8MB
   - configuration compatible with logstash-forwarder
-  - lumberjack output (including zlib compression)
+  - lumberjack stdoutClient (including zlib compression)
 
 ## Why ?
 
 Logstash-forwarder is written in go. This programming language is not available on all platforms (for example AIX), that's why a java version is more portable.
 
-Logstash runs on java and provides a lumberjack output, but the file input doesn't run on all plaforms (for example AIX) and logstash requires a recent JVM. Moreover Logstash is heavier : it is a big package and uses more system resources.
+Logstash runs on java and provides a lumberjack stdoutClient, but the file input doesn't run on all plaforms (for example AIX) and logstash requires a recent JVM. Moreover Logstash is heavier : it is a big package and uses more system resources.
 
 So logstash-forwarder-java is a solution for those who want a portable, lightweight log shipper for their ELK stack.
 
