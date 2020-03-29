@@ -1,0 +1,24 @@
+{
+  "output": {
+    "stdout": {},
+    "network": {
+      "servers": [ "172.16.104.8:5044" ],
+      "timeout": 15,
+      "ssl ca": "/Volumes/MacHD2/work/certs/lumberjack.jks"
+    },
+    "kafka": {
+      "hosts": ["49.232.115.139:9092"],
+      "topic": "test5",
+      "keep_alive": 10
+    }
+
+  },
+  "files": [
+    {
+      "paths": [
+        "/Users/maming/Downloads/a/1.log"
+      ],
+      "fields": { "type": "syslog", "sysid": "MacOS 64 bit" }
+    }
+  ]
+}

@@ -112,7 +112,7 @@ public class Forwarder {
 	}
 
 	private static void connectToServer() {
-		if (configManager.getConfig().getOutput().getStdout() != null) {
+		if (configManager.getConfig().getOutput().getKafka() != null) {
 			if (adapter == null) {
 				//adapter = new StdoutClient();
 				List<String> hostList = configManager.getConfig().getOutput().getKafka().getHosts();
