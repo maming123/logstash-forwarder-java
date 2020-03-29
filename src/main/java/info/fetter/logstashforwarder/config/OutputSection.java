@@ -6,6 +6,15 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 public class OutputSection {
     private NetworkSection network;
     private StdoutSection stdout;
+    private KafkaSection kafka;
+
+    public KafkaSection getKafka() {
+        return kafka;
+    }
+
+    public void setKafka(KafkaSection kafka) {
+        this.kafka = kafka;
+    }
 
     public NetworkSection getNetwork() {
         return network;
@@ -28,6 +37,7 @@ public class OutputSection {
         return new ToStringBuilder(this).
                 append("network", network).
                 append("stdout", stdout).
+                append("kafka",kafka).
                 toString();
     }
 

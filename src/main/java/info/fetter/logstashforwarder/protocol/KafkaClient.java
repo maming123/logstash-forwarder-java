@@ -3,27 +3,27 @@ package info.fetter.logstashforwarder.protocol;
 import info.fetter.logstashforwarder.Event;
 import info.fetter.logstashforwarder.ProtocolAdapter;
 import info.fetter.logstashforwarder.util.AdapterException;
+import info.fetter.logstashforwarder.util.GetUTCTimeUtil;
+import info.fetter.logstashforwarder.util.JsonHelper;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 public class KafkaClient implements ProtocolAdapter {
     private final static Logger logger = Logger.getLogger(KafkaClient.class);
 
     private final KafkaProducer<String, String> producer;
 
-    public final static String TOPIC = "test5";
+    private String topic = "";
 
-    public KafkaClient() {
+    public KafkaClient(String hosts,String topic,Integer keepAlive) {
 
+        this.topic =topic;
         Properties props = new Properties();
-        props.put("bootstrap.servers", "49.232.115.139:9092");//xxx服务器ip
+        props.put("bootstrap.servers", hosts);//xxx服务器ip
         props.put("acks", "all");//所有follower都响应了才认为消息提交成功，即"committed"
         props.put("retries", 0);//retries = MAX 无限重试，直到你意识到出现了问题:)
         //props.put("batch.size", 16384);//producer将试图批处理消息记录，以减少请求次数.默认的批量处理消息字节数
@@ -41,18 +41,25 @@ public class KafkaClient implements ProtocolAdapter {
 
     private int sendData(Map<String,byte[]> keyValues) throws IOException {
         int bytesSent = 0;
+        //自定义map 添加@version @timestamp
+        Map<String,String> customMap =new HashMap<String, String>();
         for(String key : keyValues.keySet()) {
             byte[] value = keyValues.get(key);
-            System.out.print(new String(value));
+            //System.out.print(" "+key+" - "+ new String(value));
             String data = new String(value);
-
-            try {
-                producer.send(new ProducerRecord<String, String>(TOPIC, data));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            customMap.put(key,new String(value));
 
             bytesSent += value.length;
+        }
+        //map转换成json
+        //customMap.put("@version","1");
+        customMap.put("@timestamp", GetUTCTimeUtil.getUTCTimeStr());
+        String json =JsonHelper.pureToJson(customMap);
+        System.out.println(json);
+        try {
+            producer.send(new ProducerRecord<String, String>(topic, json));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         System.out.println();
         System.out.flush();
