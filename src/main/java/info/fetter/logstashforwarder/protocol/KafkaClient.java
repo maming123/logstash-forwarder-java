@@ -10,6 +10,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.*;
 
 public class KafkaClient implements ProtocolAdapter {
@@ -55,6 +56,8 @@ public class KafkaClient implements ProtocolAdapter {
         //customMap.put("@version","1");
         customMap.put("@timestamp", GetUTCTimeUtil.getUTCTimeStr());
         String json =JsonHelper.pureToJson(customMap);
+        //json = new String(json.getBytes("utf-8"),"gbk");
+        System.out.println(Charset.defaultCharset().toString());
         System.out.println(json);
         try {
             producer.send(new ProducerRecord<String, String>(topic, json));
