@@ -5,6 +5,7 @@ import info.fetter.logstashforwarder.ProtocolAdapter;
 import info.fetter.logstashforwarder.util.AdapterException;
 import info.fetter.logstashforwarder.util.GetUTCTimeUtil;
 import info.fetter.logstashforwarder.util.JsonHelper;
+import org.apache.commons.lang.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.log4j.Logger;
@@ -19,9 +20,14 @@ public class KafkaClient implements ProtocolAdapter {
     private final KafkaProducer<String, String> producer;
 
     private String topic = "";
+    private String charset="UTF-8";
 
-    public KafkaClient(String hosts,String topic,Integer keepAlive) {
+    public KafkaClient(String hosts,String topic,Integer keepAlive,String charset) {
 
+        if(StringUtils.isNotBlank(charset))
+        {
+            this.charset=charset;
+        }
         this.topic =topic;
         Properties props = new Properties();
         props.put("bootstrap.servers", hosts);//xxx服务器ip
@@ -48,16 +54,17 @@ public class KafkaClient implements ProtocolAdapter {
             byte[] value = keyValues.get(key);
             //System.out.print(" "+key+" - "+ new String(value));
             String data = new String(value);
-            customMap.put(key,new String(value));
-
+            //customMap.put(key,new String(value));
+            // "GBK"
+            customMap.put(key,new String(value,charset));
             bytesSent += value.length;
         }
         //map转换成json
         //customMap.put("@version","1");
         customMap.put("@timestamp", GetUTCTimeUtil.getUTCTimeStr());
         String json =JsonHelper.pureToJson(customMap);
-        //json = new String(json.getBytes("utf-8"),"gbk");
-        System.out.println(Charset.defaultCharset().toString());
+        //String json2 = new String(json.getBytes("GBK"),"utf-8");
+        //System.out.println(Charset.defaultCharset().toString());
         System.out.println(json);
         try {
             producer.send(new ProducerRecord<String, String>(topic, json));

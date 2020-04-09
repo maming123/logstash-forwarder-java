@@ -118,8 +118,9 @@ public class Forwarder {
 				List<String> hostList = configManager.getConfig().getOutput().getKafka().getHosts();
 				String topic =configManager.getConfig().getOutput().getKafka().getTopic();
 				Integer keepAlive =configManager.getConfig().getOutput().getKafka().getKeep_alive();
+				String charset =configManager.getConfig().getOutput().getKafka().getCharset();
 				String hosts =String.join(",",hostList);
-				adapter = new KafkaClient(hosts,topic,keepAlive);
+				adapter = new KafkaClient(hosts,topic,keepAlive,charset);
 				fileReader.setAdapter(adapter);
 				inputReader.setAdapter(adapter);
 			}

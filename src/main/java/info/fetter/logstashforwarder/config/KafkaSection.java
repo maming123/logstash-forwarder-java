@@ -18,6 +18,18 @@ public class KafkaSection {
 
     private int keep_alive;
 
+    private String charset;
+
+    public String getCharset() {
+        return charset;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
+    }
+
+
+
 
     public List<String> getHosts() {
         return hosts;

@@ -9,7 +9,8 @@
     "kafka": {
       "hosts": ["49.232.115.139:9092"],
       "topic": "test5",
-      "keep_alive": 10
+      "keep_alive": 10,
+      "charset": "GBK"
     }
 
   },
