@@ -1,11 +1,11 @@
 {
   "output": {
-    "stdout": {},
-    "network": {
-      "servers": [ "172.16.104.8:5044" ],
-      "timeout": 15,
-      "ssl ca": "/Volumes/MacHD2/work/certs/lumberjack.jks"
-    },
+      "stdout": {},
+      "network": {
+        "servers": [ "172.16.104.8:5044" ],
+        "timeout": 15,
+        "ssl ca": "/Volumes/MacHD2/work/certs/lumberjack.jks"
+      },
     "kafka": {
       "hosts": ["49.232.115.139:9092"],
       "topic": "test5",
