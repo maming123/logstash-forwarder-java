@@ -51,8 +51,8 @@ import org.apache.log4j.spi.RootLogger;
 public class Forwarder {
 	private static final String SINCEDB = ".logstash-forwarder-java";
 	private static Logger logger = Logger.getLogger(Forwarder.class);
-	private static int spoolSize = 1024;
-	private static int idleTimeout = 5000;
+	private static int spoolSize = 1024*4;
+	private static int idleTimeout = 2000;
 	private static int networkTimeout = 15000;
 	private static String config;
 	private static ConfigurationManager configManager;
@@ -63,11 +63,11 @@ public class Forwarder {
 	private static boolean debugWatcherSelected = false;
 	private static ProtocolAdapter adapter;
 	private static Random random = new Random();
-	private static int signatureLength = 4096;
+	private static int signatureLength = 4096*2;
 	private static boolean tailSelected = false;
 	private static String logfile = null;
 	private static String logfileSize = "10MB";
-	private static int logfileNumber = 5;
+	private static int logfileNumber = 50;
 	private static String sincedbFile = SINCEDB;
 
 	public static void main(String[] args) {
@@ -117,12 +117,22 @@ public class Forwarder {
 				//adapter = new StdoutClient();
 				List<String> hostList = configManager.getConfig().getOutput().getKafka().getHosts();
 				String topic =configManager.getConfig().getOutput().getKafka().getTopic();
-				Integer keepAlive =configManager.getConfig().getOutput().getKafka().getKeep_alive();
+				String acks =configManager.getConfig().getOutput().getKafka().getAcks();
+				Integer retries =configManager.getConfig().getOutput().getKafka().getRetries();
+				Integer batch_size =configManager.getConfig().getOutput().getKafka().getBatch_size();
+				Integer linger_ms =configManager.getConfig().getOutput().getKafka().getLinger_ms();
+				Integer buffer_memory =configManager.getConfig().getOutput().getKafka().getBuffer_memory();
 				String charset =configManager.getConfig().getOutput().getKafka().getCharset();
+				Integer output2kafka =configManager.getConfig().getOutput().getKafka().getOutput2kafka();
 				String hosts =String.join(",",hostList);
-				adapter = new KafkaClient(hosts,topic,keepAlive,charset);
-				fileReader.setAdapter(adapter);
-				inputReader.setAdapter(adapter);
+				try {
+					adapter = new KafkaClient(hosts, topic, acks, retries, batch_size, linger_ms, buffer_memory, charset, output2kafka);
+					fileReader.setAdapter(adapter);
+					inputReader.setAdapter(adapter);
+				}catch (Exception ex){
+
+					logger.error(ex);
+				}
 			}
 		} else {
 			int randomServerIndex = 0;
@@ -169,6 +179,7 @@ public class Forwarder {
 		Option debugOption = new Option("debug", "operate in debug mode");
 		Option debugWatcherOption = new Option("debugwatcher", "operate watcher in debug mode");
 		Option traceOption = new Option("trace", "operate in trace mode");
+		Option infoOption = new Option("info", "operate in info mode");
 		Option tailOption = new Option("tail", "read new files from the end");
 
 		Option spoolSizeOption = OptionBuilder.withArgName("number of events")
@@ -218,7 +229,8 @@ public class Forwarder {
 		.addOption(logfileOption)
 		.addOption(logfileNumberOption)
 		.addOption(logfileSizeOption)
-		.addOption(sincedbOption);
+		.addOption(sincedbOption)
+		.addOption(infoOption);
 
 		CommandLineParser parser = new GnuParser();
 		try {
@@ -243,6 +255,9 @@ public class Forwarder {
 			}
 			if(line.hasOption("trace")) {
 				logLevel = TRACE;
+			}
+			if(line.hasOption("info")) {
+				logLevel = INFO;
 			}
 			if(line.hasOption("debugwatcher")) {
 				debugWatcherSelected = true;

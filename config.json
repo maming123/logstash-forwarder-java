@@ -9,17 +9,23 @@
     "kafka": {
       "hosts": ["49.232.115.139:9092"],
       "topic": "test5",
-      "keep_alive": 10,
-      "charset": "GBK"
+      "charset": "GBK",
+      "acks": "0",
+      "retries": 0,
+      "batch_size": 16384,
+      "linger_ms": 1000,
+      "buffer_memory": 33554432,
+      "output2kafka":0
     }
-
   },
   "files": [
     {
       "paths": [
-        "/Users/maming/Downloads/a/1.log"
+
+        "/Users/maming/test/c/*.log"
       ],
-      "fields": { "type": "syslog", "sysid": "MacOS 64 bit" }
+      "fields": { "type": "syslog", "sysid": "MacOS 64 bit" },
+      "dead time": "1000h"
     }
   ]
 }
