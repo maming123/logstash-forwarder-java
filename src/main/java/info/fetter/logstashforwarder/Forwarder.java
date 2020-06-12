@@ -63,7 +63,7 @@ public class Forwarder {
 	private static boolean debugWatcherSelected = false;
 	private static ProtocolAdapter adapter;
 	private static Random random = new Random();
-	private static int signatureLength = 4096*2;
+	private static int signatureLength = 4096; //
 	private static boolean tailSelected = false;
 	private static String logfile = null;
 	private static String logfileSize = "10MB";
@@ -99,7 +99,9 @@ public class Forwarder {
 	private static void infiniteLoop() throws IOException, InterruptedException {
 		while(true) {
 			try {
+
 				watcher.checkFiles();
+
 				while(watcher.readFiles(fileReader) == spoolSize);
 				while(watcher.readStdin(inputReader) == spoolSize);
 				Thread.sleep(idleTimeout);
@@ -250,15 +252,17 @@ public class Forwarder {
 			if(line.hasOption("quiet")) {
 				logLevel = ERROR;
 			}
+
+			if(line.hasOption("info")) {
+				logLevel = INFO;
+			}
 			if(line.hasOption("debug")) {
 				logLevel = DEBUG;
 			}
 			if(line.hasOption("trace")) {
 				logLevel = TRACE;
 			}
-			if(line.hasOption("info")) {
-				logLevel = INFO;
-			}
+
 			if(line.hasOption("debugwatcher")) {
 				debugWatcherSelected = true;
 			}

@@ -21,7 +21,6 @@
   "files": [
     {
       "paths": [
-
         "/Users/maming/test/c/*.log"
       ],
       "fields": { "type": "syslog", "sysid": "MacOS 64 bit" },

@@ -271,6 +271,7 @@ public class FileWatcher {
 		try {
 			FileState state = new FileState(file);
 			state.setFields(fields);
+			//文件的字节数 如果超过最大字节数 那么就用最大字节为准
 			int signatureLength = (int) (state.getSize() > maxSignatureLength ? maxSignatureLength : state.getSize());
 			state.setSignatureLength(signatureLength);
 			long signature = FileSigner.computeSignature(state.getRandomAccessFile(), signatureLength);
@@ -319,11 +320,13 @@ public class FileWatcher {
 	private void printWatchMap() throws IOException {
 		if(logger.isTraceEnabled()) {
 			logger.trace("WatchMap contents : ");
+			logger.trace("WatchMap contents size : "+oldWatchMap.size());
 			for(File file : oldWatchMap.keySet()) {
 				FileState state = oldWatchMap.get(file);
 				logger.trace("\tFile : " + file.getCanonicalPath() + " marked for deletion : " + state.isDeleted());
 			}
 		}
+
 	}
 
 	private void removeMarkedFilesFromWatchMap() throws IOException {
