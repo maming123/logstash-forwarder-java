@@ -80,12 +80,18 @@ public class Forwarder {
 			watcher.setSincedb(sincedbFile);
 			configManager = new ConfigurationManager(config);
 			configManager.readConfiguration();
+			int count=0;
+			logger.info("开始加载文件...");
 			for(FilesSection files : configManager.getConfig().getFiles()) {
 				for(String path : files.getPaths()) {
 					watcher.addFilesToWatch(path, new Event(files.getFields()), files.getDeadTimeInSeconds() * 1000, files.getMultiline(), files.getFilter());
 				}
 			}
+			logger.info("文件加载完成...");
+			logger.info("初始化 watcher.initialize()");
 			watcher.initialize();
+			logger.info("初始化完成 watcher.initialize()");
+
 			fileReader = new FileReader(spoolSize);
 			inputReader = new InputReader(spoolSize, System.in);
 			connectToServer();
@@ -100,9 +106,12 @@ public class Forwarder {
 		while(true) {
 			try {
 
+				logger.info("watcher.checkFiles() start...");
 				watcher.checkFiles();
-
+				logger.info("watcher.checkFiles() complete...");
+				logger.info("watcher.readFiles(fileReader) begin");
 				while(watcher.readFiles(fileReader) == spoolSize);
+				logger.info("watcher.readFiles(fileReader) end");
 				while(watcher.readStdin(inputReader) == spoolSize);
 				Thread.sleep(idleTimeout);
 			} catch(AdapterException e) {

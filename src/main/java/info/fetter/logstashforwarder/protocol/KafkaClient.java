@@ -75,7 +75,7 @@ public class KafkaClient implements ProtocolAdapter {
         String json =JsonHelper.pureToJson(customMap);
         //String json2 = new String(json.getBytes("GBK"),"utf-8");
         //System.out.println(Charset.defaultCharset().toString());
-        System.out.println(json);
+        //System.out.println(json);
         try {
             //send()方法是异步的，添加消息到缓冲区等待发送，并立即返回。这允许生产者将单个的消息批量在一起发送来提高效率
             if(output2kafka.equals(1)) {
@@ -105,14 +105,21 @@ public class KafkaClient implements ProtocolAdapter {
             if(logger.isInfoEnabled()) {
 
                 if(null!=eventList && eventList.size()>0) {
+                    String fileName="";
+                    List<String> list =new ArrayList<>();
                     for(int i=0;i<numberOfEvents;i++) {
                         byte[] fileNameByte = eventList.get(i).getValue("file");
-                        String fileName = new String(fileNameByte, charset);
+                        fileName = new String(fileNameByte, charset);
+                        if(!list.contains(fileName)){
+                            list.add(fileName);
+                        }
+                    }
+                        fileName =String.join(",",list);
                         logger.info("file: " + fileName + " Sending " + numberOfEvents + " events");
                         System.out.println(GetUTCTimeUtil.getUTCTimeStr() + " file: " + fileName + " Sending " + numberOfEvents + " events");
                     }
                 }
-            }
+
             List<Map<String,byte[]>> keyValuesList = new ArrayList<Map<String,byte[]>>(numberOfEvents);
             for(Event event : eventList) {
                 keyValuesList.add(event.getKeyValues());
