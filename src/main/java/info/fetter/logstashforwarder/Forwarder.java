@@ -81,16 +81,17 @@ public class Forwarder {
 			configManager = new ConfigurationManager(config);
 			configManager.readConfiguration();
 			int count=0;
-			logger.info("开始加载文件...");
+			logger.info("watcher.addFilesToWatch... start");
 			for(FilesSection files : configManager.getConfig().getFiles()) {
 				for(String path : files.getPaths()) {
 					watcher.addFilesToWatch(path, new Event(files.getFields()), files.getDeadTimeInSeconds() * 1000, files.getMultiline(), files.getFilter());
+					System.out.println(path);
 				}
 			}
-			logger.info("文件加载完成...");
-			logger.info("初始化 watcher.initialize()");
+			logger.info("watcher.addFilesToWatch... end");
+			logger.info("watcher.initialize() start");
 			watcher.initialize();
-			logger.info("初始化完成 watcher.initialize()");
+			logger.info("watcher.initialize() end");
 
 			fileReader = new FileReader(spoolSize);
 			inputReader = new InputReader(spoolSize, System.in);

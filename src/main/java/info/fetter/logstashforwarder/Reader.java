@@ -66,7 +66,7 @@ public abstract class Reader {
 		Event event = new Event(fields);
 		event.addField("file", fileName)
 		.addField("offset", pos)
-		.addField("line", line)
+		.addField("message", line)
 		.addField("host", hostname);
 		eventList.add(event);
 	}
@@ -75,7 +75,7 @@ public abstract class Reader {
 		Event event = new Event(fields);
 		event.addField("file", fileName)
 		.addField("offset", pos)
-		.addField("line", line)
+		.addField("message", line)
 		.addField("host", hostname);
 		eventList.add(event);
 	}
