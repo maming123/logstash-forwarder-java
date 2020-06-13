@@ -22,15 +22,13 @@ import info.fetter.logstashforwarder.util.LastModifiedFileFilter;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.apache.log4j.Logger;
@@ -76,7 +74,9 @@ public class FileWatcher {
 				addStdIn(fields);
 			} else if(fileToWatch.contains("*")) {
 				addWildCardFiles(fileToWatch, fields, deadTime, multiline, filter);
-			} else {
+			} else if(fileToWatch.contains("^")) {
+				addRegexFiles(fileToWatch, fields, deadTime, multiline, filter);
+			}else{
 				addSingleFile(fileToWatch, fields, deadTime, multiline, filter);
 			}
 		} catch(Exception e) {
@@ -246,6 +246,18 @@ public class FileWatcher {
 		initializeWatchMap(new File(directory), fileFilter, fields, multiline, filter);
 	}
 
+	private void addRegexFiles(String filesToWatch, Event fields, long deadTime, Multiline multiline, Filter filter) throws Exception {
+		logger.info("Watching Regex files : " + filesToWatch);
+		String directory = FilenameUtils.getFullPath(filesToWatch);
+		String regex = FilenameUtils.getName(filesToWatch);
+		logger.trace("Directory : " + new File(directory).getCanonicalPath() + ", regex : " + regex);
+		IOFileFilter fileFilter = FileFilterUtils.and(
+				FileFilterUtils.fileFileFilter(),
+				new RegexFileFilter(regex),
+				new LastModifiedFileFilter(deadTime));
+		initializeWatchMap(new File(directory), fileFilter, fields, multiline, filter);
+	}
+
 	private void addStdIn(Event fields) {
 		logger.error("Watching stdin");
 		stdinFields = fields;
@@ -262,7 +274,8 @@ public class FileWatcher {
 		observer.addListener(listener);
 		observerList.add(observer);
 		observer.initialize();
-		for(File file : FileUtils.listFiles(directory, fileFilter, null)) {
+		Collection<File> collection = FileUtils.listFiles(directory, fileFilter, null);
+		for(File file : collection) {
 			addFileToWatchMap(newWatchMap, file, fields, multiline, filter);
 		}
 	}
@@ -326,6 +339,7 @@ public class FileWatcher {
 				logger.trace("\tFile : " + file.getCanonicalPath() + " marked for deletion : " + state.isDeleted());
 			}
 		}
+		logger.info("WatchMap contents size : "+oldWatchMap.size());
 
 	}
 
