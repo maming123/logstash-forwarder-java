@@ -51,9 +51,11 @@ public class FileWatcher {
 
 	public void initialize() throws IOException {
 		logger.debug("Initializing FileWatcher");
+		int count =0;
 		if(savedStates != null) {
 			for(FileState state : savedStates) {
-				logger.info("Loading file state: " + state.getFile() + ":" + state.getPointer());
+				count++;
+				logger.info("Loading file number: " +count+" state: " + state.getFile() + ":" + state.getPointer());
 				oldWatchMap.put(state.getFile(), state);
 			}
 		}

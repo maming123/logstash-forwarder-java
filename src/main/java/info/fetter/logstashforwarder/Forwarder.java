@@ -85,7 +85,8 @@ public class Forwarder {
 			for(FilesSection files : configManager.getConfig().getFiles()) {
 				for(String path : files.getPaths()) {
 					watcher.addFilesToWatch(path, new Event(files.getFields()), files.getDeadTimeInSeconds() * 1000, files.getMultiline(), files.getFilter());
-					System.out.println(path);
+					count++;
+					System.out.println("file number: "+ count +" filename: "+path);
 				}
 			}
 			logger.info("watcher.addFilesToWatch... end");
