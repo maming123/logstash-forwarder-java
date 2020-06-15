@@ -6,13 +6,16 @@ import info.fetter.logstashforwarder.util.AdapterException;
 import info.fetter.logstashforwarder.util.GetUTCTimeUtil;
 import info.fetter.logstashforwarder.util.JsonHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.Future;
 
 public class KafkaClient implements ProtocolAdapter {
     private final static Logger logger = Logger.getLogger(KafkaClient.class);
@@ -36,7 +39,7 @@ public class KafkaClient implements ProtocolAdapter {
         props.put("bootstrap.servers", hosts);//xxx服务器ip
         //所有follower都响应了才认为消息提交成功，即"committed",ack是判别请求是否为完整的条件。我们指定了“all”将会阻塞消息，这种设置使性能最低，但是是最可靠的
         //参数设置成0，producer端不确定消息是否发送成功，只是发出去，并不等待broker返回响应，数据可能丢失，但是优势是对于吞吐量高，不要求保证完整一致性的需求来说（比如日志处理），这是好的方式,
-        //参数设置成-1或者all，producer会在所有备份的partition收到消息时得到broker的确认，这个设置可以得到最高的可靠性保证
+        //参数设置成1或者all，producer会在所有备份的partition收到消息时得到broker的确认，这个设置可以得到最高的可靠性保证
         props.put("acks",acks );//"all"
         //retries = MAX 无限重试，直到你意识到出现了问题:) 如果请求失败，生产者会自动重试，我们指定是0次即不启动重试，如果启用重试，则会有重复消息的可能性。
         props.put("retries",retries); //0
@@ -73,21 +76,35 @@ public class KafkaClient implements ProtocolAdapter {
         //customMap.put("@version","1");
         customMap.put("@timestamp", GetUTCTimeUtil.getUTCTimeStr());
         String json =JsonHelper.pureToJson(customMap);
-        //String json2 = new String(json.getBytes("GBK"),"utf-8");
-        //System.out.println(Charset.defaultCharset().toString());
-        //System.out.println(json);
-        try {
-            //send()方法是异步的，添加消息到缓冲区等待发送，并立即返回。这允许生产者将单个的消息批量在一起发送来提高效率
-            if(output2kafka.equals(1)) {
-                producer.send(new ProducerRecord<String, String>(topic, json));
-            }
-        } catch (Exception e) {
-            logger.error(e);
-            e.printStackTrace();
+
+        //send()方法是异步的，添加消息到缓冲区等待发送，并立即返回。这允许生产者将单个的消息批量在一起发送来提高效率
+        if (output2kafka.equals(1)) {
+            // producer默认是异步的
+            //Future<RecordMetadata> future = producer.send(new ProducerRecord<String, String>(topic, json));
+            //如果加了get就变成了同步,也就是说要等待get到服务端返回的结果后再往下执行
+            //调用get 方法 就是同步发送消息
+            //logger.info(JsonHelper.toJson(future.get()));
+            //#异步发送消息
+            ProducerRecord<String, String> record = new ProducerRecord<String, String>(topic, json);
+            producer.send(record, new KafkaProducerCallBack());
         }
         //System.out.println();
         //System.out.flush();
         return bytesSent;
+    }
+
+    /**
+     * 异步回调类
+     */
+    private class KafkaProducerCallBack implements Callback{
+
+        @Override
+        public void onCompletion(RecordMetadata recordMetadata, Exception e) {
+            if(e!=null){
+                logger.error(e);
+                e.printStackTrace();
+            }
+        }
     }
 
     public int sendFrame(List<Map<String,byte[]>> keyValuesList) throws IOException {
@@ -142,3 +159,5 @@ public class KafkaClient implements ProtocolAdapter {
         return 0;
     }
 }
+
+

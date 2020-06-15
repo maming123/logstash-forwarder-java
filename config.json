@@ -15,7 +15,7 @@
       "batch_size": 16384,
       "linger_ms": 1000,
       "buffer_memory": 33554432,
-      "output2kafka":0
+      "output2kafka":1
     }
   },
   "files": [
