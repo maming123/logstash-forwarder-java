@@ -180,7 +180,8 @@ public class FileWatcherTest {
 		}
 		//不要的文件
 		//String fileToWarth="/Users/maming/test/c/^[0-9]+.log";
-		String fileToWarth="/Users/maming/test/c/^d_[0-9]+_[0-9]+.log";
+		//String fileToWarth="/Users/maming/test/c/^d_[0-9]+_[0-9]+.log";
+		String fileToWarth="/Users/maming/test/c/^[^.]+.log$"; //不包含.的任意字符
 //		RegexFileFilter regex2 = new RegexFileFilter("^[0-9]+.log");
 //		boolean bbb =Pattern.compile("^[2-9]+.log").matcher("1.log").matches();
 //		boolean bb = regex2.accept(new File("/Users/maming/test/c/1.log"));
@@ -192,7 +193,7 @@ public class FileWatcherTest {
 				new RegexFileFilter(regex),
 				new LastModifiedFileFilter(FileWatcher.ONE_DAY*1000));
 		File dir =new File(directory);
-		boolean b = fileFilter.accept(new File("/Users/maming/test/c/1.log"));
+
 
 		Collection<File> collection = FileUtils.listFiles(dir, fileFilter, null);
 		//FileWatcher watcher = new FileWatcher();

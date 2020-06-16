@@ -21,7 +21,7 @@
   "files": [
     {
       "paths": [
-        "/Users/maming/test/c/*.log"
+        "/Users/maming/test/c/^[^.]+.log$"
       ],
       "fields": { "type": "syslog", "sysid": "MacOS 64 bit" },
       "dead time": "1000h"
