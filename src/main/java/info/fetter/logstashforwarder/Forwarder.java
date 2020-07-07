@@ -25,7 +25,7 @@ import java.util.Random;
 
 import info.fetter.logstashforwarder.config.ConfigurationManager;
 import info.fetter.logstashforwarder.config.FilesSection;
-import info.fetter.logstashforwarder.protocol.KafkaClient;
+import info.fetter.logstashforwarder.protocol.MyKafkaClient;
 import info.fetter.logstashforwarder.protocol.LumberjackClient;
 import info.fetter.logstashforwarder.protocol.StdoutClient;
 import info.fetter.logstashforwarder.util.AdapterException;
@@ -139,7 +139,7 @@ public class Forwarder {
 				Integer output2kafka =configManager.getConfig().getOutput().getKafka().getOutput2kafka();
 				String hosts =String.join(",",hostList);
 				try {
-					adapter = new KafkaClient(hosts, topic, acks, retries, batch_size, linger_ms, buffer_memory, charset, output2kafka);
+					adapter = new MyKafkaClient(hosts, topic, acks, retries, batch_size, linger_ms, buffer_memory, charset, output2kafka);
 					fileReader.setAdapter(adapter);
 					inputReader.setAdapter(adapter);
 				}catch (Exception ex){

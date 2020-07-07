@@ -13,12 +13,10 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.*;
-import java.util.concurrent.Future;
 
-public class KafkaClient implements ProtocolAdapter {
-    private final static Logger logger = Logger.getLogger(KafkaClient.class);
+public class MyKafkaClient implements ProtocolAdapter {
+    private final static Logger logger = Logger.getLogger(MyKafkaClient.class);
 
     private final KafkaProducer<String, String> producer;
 
@@ -26,8 +24,8 @@ public class KafkaClient implements ProtocolAdapter {
     private String charset="UTF-8";
     private Integer output2kafka=0;
 
-    public KafkaClient(String hosts,String topic,String acks,Integer retries,Integer batchSize
-            ,Integer lingerMs,Integer bufferMemory,String charset,Integer output2kafka) {
+    public MyKafkaClient(String hosts, String topic, String acks, Integer retries, Integer batchSize
+            , Integer lingerMs, Integer bufferMemory, String charset, Integer output2kafka) {
 
         if(StringUtils.isNotBlank(charset))
         {
