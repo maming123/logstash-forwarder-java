@@ -48,53 +48,58 @@ public class InputReaderTest {
 
 	@Test
 	public void testInputReader1() throws IOException, InterruptedException, AdapterException {
-		int numberOfEvents = 0;
-		PipedInputStream in = new PipedInputStream();
-		PipedOutputStream out = new PipedOutputStream(in);
-		PrintWriter writer = new PrintWriter(out);
-		InputReader reader = new InputReader(2, in);
-		MockProtocolAdapter adapter = new MockProtocolAdapter();
-		reader.setAdapter(adapter);
 
-		numberOfEvents = reader.readInput();
-		assertEquals(0, numberOfEvents);
+			int numberOfEvents = 0;
+			PipedInputStream in = new PipedInputStream();
+			PipedOutputStream out = new PipedOutputStream(in);
+			PrintWriter writer = new PrintWriter(out);
+		try {
+			InputReader reader = new InputReader(2, in);
+			MockProtocolAdapter adapter = new MockProtocolAdapter();
+			reader.setAdapter(adapter);
 
-		writer.println("line1");
-		writer.flush();
-		numberOfEvents = reader.readInput();
-		assertEquals(1, numberOfEvents);
-		assertArrayEquals("line1".getBytes(), adapter.getLastEvents().get(0).getValue("line"));
+			numberOfEvents = reader.readInput();
+			assertEquals(0, numberOfEvents);
 
-		writer.print("line2");
-		writer.flush();
-		numberOfEvents = reader.readInput();
-		assertEquals(0, numberOfEvents);
+			writer.println("line1");
+			writer.flush();
+			numberOfEvents = reader.readInput();
+			assertEquals(1, numberOfEvents);
+			assertArrayEquals("line1".getBytes(), adapter.getLastEvents().get(0).getValue("line"));
 
-		writer.println();
-		writer.flush();
-		numberOfEvents = reader.readInput();
-		assertEquals(1, numberOfEvents);
-		assertArrayEquals("line2".getBytes(), adapter.getLastEvents().get(0).getValue("line"));
+			writer.print("line2");
+			writer.flush();
+			numberOfEvents = reader.readInput();
+			assertEquals(0, numberOfEvents);
 
-		writer.println("line3");
-		writer.println("line4");
-		writer.println("line5");
-		writer.flush();
-		numberOfEvents = reader.readInput();
-		assertEquals(2, numberOfEvents);
-		assertArrayEquals("line3".getBytes(), adapter.getLastEvents().get(0).getValue("line"));
-		assertArrayEquals("line4".getBytes(), adapter.getLastEvents().get(1).getValue("line"));
+			writer.println();
+			writer.flush();
+			numberOfEvents = reader.readInput();
+			assertEquals(1, numberOfEvents);
+			assertArrayEquals("line2".getBytes(), adapter.getLastEvents().get(0).getValue("line"));
 
-		numberOfEvents = reader.readInput();
-		assertEquals(1, numberOfEvents);
-		assertArrayEquals("line5".getBytes(), adapter.getLastEvents().get(0).getValue("line"));
-		
-		numberOfEvents = reader.readInput();
-		assertEquals(0, numberOfEvents);
+			writer.println("line3");
+			writer.println("line4");
+			writer.println("line5");
+			writer.flush();
+			numberOfEvents = reader.readInput();
+			assertEquals(2, numberOfEvents);
+			assertArrayEquals("line3".getBytes(), adapter.getLastEvents().get(0).getValue("line"));
+			assertArrayEquals("line4".getBytes(), adapter.getLastEvents().get(1).getValue("line"));
 
-		assertEquals(0, in.available());
+			numberOfEvents = reader.readInput();
+			assertEquals(1, numberOfEvents);
+			assertArrayEquals("line5".getBytes(), adapter.getLastEvents().get(0).getValue("line"));
 
-		writer.close();
+			numberOfEvents = reader.readInput();
+			assertEquals(0, numberOfEvents);
+
+			assertEquals(0, in.available());
+
+			//writer.close();
+		}finally {
+			writer.close();
+		}
 	}
 	
 	@Test
@@ -103,22 +108,27 @@ public class InputReaderTest {
 		PipedInputStream in = new PipedInputStream();
 		PipedOutputStream out = new PipedOutputStream(in);
 		PrintWriter writer = new PrintWriter(out);
-		InputReader reader = new InputReader(2, in);
-		MockProtocolAdapter adapter = new MockProtocolAdapter();
-		reader.setAdapter(adapter);
+		try {
+			InputReader reader = new InputReader(2, in);
+			MockProtocolAdapter adapter = new MockProtocolAdapter();
+			reader.setAdapter(adapter);
 
-		numberOfEvents = reader.readInput();
-		assertEquals(0, numberOfEvents);
+			numberOfEvents = reader.readInput();
+			assertEquals(0, numberOfEvents);
 
-		writer.println("line1");
-		writer.flush();
-		numberOfEvents = reader.readInput();
-		assertEquals(1, numberOfEvents);
-		assertArrayEquals("line1".getBytes(), adapter.getLastEvents().get(0).getValue("line"));
-		
-		writer.close();
-		in.close();
-		
-		numberOfEvents = reader.readInput();
+			writer.println("line1");
+			writer.flush();
+			numberOfEvents = reader.readInput();
+			assertEquals(1, numberOfEvents);
+			assertArrayEquals("line1".getBytes(), adapter.getLastEvents().get(0).getValue("line"));
+
+
+
+
+			numberOfEvents = reader.readInput();
+		}finally {
+			writer.close();
+			in.close();
+		}
 	}
 }

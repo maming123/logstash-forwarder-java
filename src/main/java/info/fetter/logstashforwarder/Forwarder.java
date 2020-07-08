@@ -147,41 +147,42 @@ public class Forwarder {
 					logger.error(ex);
 				}
 			}
-		} else {
-			int randomServerIndex = 0;
-			List<String> serverList = configManager.getConfig().getOutput().getNetwork().getServers();
-			networkTimeout = configManager.getConfig().getOutput().getNetwork().getTimeout() * 1000;
-			if (adapter != null) {
-				try {
-					adapter.close();
-				} catch (AdapterException e) {
-					logger.error("Error while closing connection to " + adapter.getServer() + ":" + adapter.getPort());
-				} finally {
-					adapter = null;
-				}
-			}
-			while (adapter == null) {
-				try {
-					randomServerIndex = random.nextInt(serverList.size());
-					String[] serverAndPort = serverList.get(randomServerIndex).split(":");
-					logger.info("Trying to connect to " + serverList.get(randomServerIndex));
-					adapter = new LumberjackClient(configManager.getConfig().getOutput().getNetwork().getSslCA(), serverAndPort[0], Integer.parseInt(serverAndPort[1]), networkTimeout);
-					fileReader.setAdapter(adapter);
-					inputReader.setAdapter(adapter);
-				} catch (Exception ex) {
-					if (logger.isDebugEnabled()) {
-						logger.error("Failed to connect to server " + serverList.get(randomServerIndex) + " : ", ex);
-					} else {
-						logger.error("Failed to connect to server " + serverList.get(randomServerIndex) + " : " + ex.getMessage());
-					}
-					try {
-						Thread.sleep(networkTimeout);
-					} catch (InterruptedException e) {
-						logger.error(e.getMessage());
-					}
-				}
-			}
 		}
+//		else {
+//			int randomServerIndex = 0;
+//			List<String> serverList = configManager.getConfig().getOutput().getNetwork().getServers();
+//			networkTimeout = configManager.getConfig().getOutput().getNetwork().getTimeout() * 1000;
+//			if (adapter != null) {
+//				try {
+//					adapter.close();
+//				} catch (AdapterException e) {
+//					logger.error("Error while closing connection to " + adapter.getServer() + ":" + adapter.getPort());
+//				} finally {
+//					adapter = null;
+//				}
+//			}
+//			while (adapter == null) {
+//				try {
+//					randomServerIndex = random.nextInt(serverList.size());
+//					String[] serverAndPort = serverList.get(randomServerIndex).split(":");
+//					logger.info("Trying to connect to " + serverList.get(randomServerIndex));
+//					adapter = new LumberjackClient(configManager.getConfig().getOutput().getNetwork().getSslCA(), serverAndPort[0], Integer.parseInt(serverAndPort[1]), networkTimeout);
+//					fileReader.setAdapter(adapter);
+//					inputReader.setAdapter(adapter);
+//				} catch (Exception ex) {
+//					if (logger.isDebugEnabled()) {
+//						logger.error("Failed to connect to server " + serverList.get(randomServerIndex) + " : ", ex);
+//					} else {
+//						logger.error("Failed to connect to server " + serverList.get(randomServerIndex) + " : " + ex.getMessage());
+//					}
+//					try {
+//						Thread.sleep(networkTimeout);
+//					} catch (InterruptedException e) {
+//						logger.error(e.getMessage());
+//					}
+//				}
+//			}
+//		}
 	}
 
 	@SuppressWarnings("static-access")

@@ -191,7 +191,7 @@ public class FileWatcherTest {
 		IOFileFilter fileFilter = FileFilterUtils.and(
 				FileFilterUtils.fileFileFilter(),
 				new RegexFileFilter(regex),
-				new LastModifiedFileFilter(FileWatcher.ONE_DAY*1000));
+				new LastModifiedFileFilter(FileWatcher.ONE_DAY));
 		File dir =new File(directory);
 
 

@@ -57,10 +57,10 @@ public abstract class JsonHelper {
         return StringHelper.isEmpty(json)?null:gsonDateBuilder.fromJson(json.trim(), typeOfT);
     }*/
 
-    public static <T> T mapFromJson(Object object, Class<T> clazz) {
-        String json = toJson(object);
-        return !StringHelper.isEmpty(json)?fromJson(json.trim(), clazz):null;
-    }
+//    public static <T> T mapFromJson(Object object, Class<T> clazz) {
+//        String json = toJson(object);
+//        return !StringHelper.isEmpty(json)?fromJson(json.trim(), clazz):null;
+//    }
 
 //    public static <T> T mapFromJson(Object object, Type typeOfT) {
 //        String json = toJson(object);
