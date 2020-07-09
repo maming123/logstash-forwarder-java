@@ -7,7 +7,7 @@ echo ${base_dir}
 JAR_NAME="logstash-forwarder-java-0.2.7-SNAPSHOT.jar"
 
 CONFGI_NAME="${base_dir}/conf/config.json"
-LOGFILENAME="${base_dir}/log/logstash_forwarder.log"
+LOGFILENAME="${base_dir}/log/logstash-forwarder.log"
 SINCEDBNAME="${base_dir}/conf/sincedb"
 
 JAVAOPS="-Xms1024m -Xmx1024m"
@@ -21,7 +21,7 @@ echo ${PARAMS}
 COMMAND=$1
 
 if [ "$COMMAND" = "-daemon" ]; then
-  nohup java ${JAVAOPS} -jar ${FULLNAME} ${PARAMS}  2>&1 < /dev/null &
+  nohup java ${JAVAOPS} -jar ${FULLNAME} ${PARAMS}  >/dev/null 2>&1 &
   # $base_dir/libs/$JAR_NAME 2>&1 < /dev/null &
 else
   java ${JAVAOPS} -jar ${FULLNAME} ${PARAMS}
