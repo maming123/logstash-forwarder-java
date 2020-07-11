@@ -12,5 +12,5 @@ echo $FULLNAME
 
 ps -ef| grep $FULLNAME | grep -v grep | awk '{print $2}'| while read pid
 do
-kill -9 $pid
+echo "$JAR_NAME running pid $pid"
 done
