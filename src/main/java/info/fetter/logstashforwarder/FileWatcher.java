@@ -267,15 +267,17 @@ public class FileWatcher {
 	}
 
 	private void initializeWatchMap(File directory, IOFileFilter fileFilter, Event fields, Multiline multiline, Filter filter) throws Exception {
-		if(!directory.isDirectory()) {
-			logger.warn("Directory " + directory + " does not exist");
-			return;
-		}
+
 		FileAlterationObserver observer = new FileAlterationObserver(directory, fileFilter);
 		FileModificationListener listener = new FileModificationListener(this, fields, multiline, filter);
 		observer.addListener(listener);
 		observerList.add(observer);
 		observer.initialize();
+
+		if(!directory.isDirectory()) {
+			logger.warn("Directory " + directory + " does not exist");
+			return;
+		}
 		Collection<File> collection = FileUtils.listFiles(directory, fileFilter, null);
 		for(File file : collection) {
 			addFileToWatchMap(newWatchMap, file, fields, multiline, filter);
