@@ -56,7 +56,7 @@ public class FileWatcherTest {
 
 	//@Test
 	public void testFileWatch() throws InterruptedException, IOException {
-		FileWatcher watcher = new FileWatcher();
+		FileWatcher watcher = new FileWatcher(true);
 		watcher.addFilesToWatch("./test.txt", new Event().addField("test", "test"), FileWatcher.ONE_DAY, null, null);
 		for(int i = 0; i < 100; i++) {
 			Thread.sleep(1000);
@@ -66,7 +66,7 @@ public class FileWatcherTest {
 
 	//@Test
 	public void testFileWatchWithMultilines() throws InterruptedException, IOException {
-		FileWatcher watcher = new FileWatcher();
+		FileWatcher watcher = new FileWatcher(true);
 		Multiline multiline = new Multiline();
 		watcher.addFilesToWatch("./test.txt", new Event().addField("test", "test"), FileWatcher.ONE_DAY, multiline, null);
 		for(int i = 0; i < 100; i++) {
@@ -81,7 +81,7 @@ public class FileWatcherTest {
 			logger.warn("Not executing this test on windows");
 			return;
 		}
-		FileWatcher watcher = new FileWatcher();
+		FileWatcher watcher = new FileWatcher(true);
 		watcher.addFilesToWatch("./testFileWatcher*.txt", new Event().addField("test", "test"), FileWatcher.ONE_DAY, null, null);
 		watcher.initialize();
 
@@ -126,7 +126,7 @@ public class FileWatcherTest {
 			logger.warn("Not executing this test on windows");
 			return;
 		}
-		FileWatcher watcher = new FileWatcher();
+		FileWatcher watcher = new FileWatcher(true);
                 Map<String, String> m = new HashMap<String, String>();
                 m.put("pattern", " nl");
                 m.put("negate", "false");

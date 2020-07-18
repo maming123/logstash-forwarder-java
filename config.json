@@ -1,0 +1,17 @@
+{
+  "output": {
+    "stdout": {}
+  },
+  "files": [
+    {
+      "paths": [
+        "/var/log/*.log*"
+      ],
+      "fields": { "type": "/var/log", "sysid": "MacOS 64 bit" },
+      "dead time": "1008h32m50s"
+    }
+  ],
+  "settings": {
+    "cache_id_using_inode": true
+  }
+}

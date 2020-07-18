@@ -22,31 +22,41 @@ import java.util.List;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 public class Configuration {
-	private OutputSection output;
-	private List<FilesSection> files;
+    private OutputSection output;
+    private List<FilesSection> files;
+    private SettingsSection settings;
 
-	public OutputSection getOutput() {
-		return output;
-	}
+    public OutputSection getOutput() {
+        return output;
+    }
 
-	public void setOutput(OutputSection output) {
-		this.output = output;
-	}
+    public void setOutput(OutputSection output) {
+        this.output = output;
+    }
 
-	public List<FilesSection> getFiles() {
-		return files;
-	}
+    public List<FilesSection> getFiles() {
+        return files;
+    }
 
-	public void setFiles(List<FilesSection> files) {
-		this.files = files;
-	}
-	
-	@Override
-	public String toString() {
-	     return new ToStringBuilder(this).
-	    	       append("output", output).
-	    	       append("files", files).
-	    	       toString();
-	}
-	
+    public void setFiles(List<FilesSection> files) {
+        this.files = files;
+    }
+
+    public SettingsSection getSettings() {
+        return settings;
+    }
+
+    public void setSettings(SettingsSection settings) {
+        this.settings = settings;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this).
+                append("output", output).
+                append("files", files).
+                append("settings", settings).
+                toString();
+    }
+
 }

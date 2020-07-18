@@ -29,5 +29,8 @@
       "multiline": { "pattern": "^[0-9]{4}", "negate": "true" },
       "dead time": "1008h32m50s"
     }
-  ]
+  ],
+  "settings": {
+    "cache_id_using_inode": true
+  }
 }
