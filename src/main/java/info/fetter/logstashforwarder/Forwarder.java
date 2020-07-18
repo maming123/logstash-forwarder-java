@@ -77,7 +77,18 @@ public class Forwarder {
 			configManager = new ConfigurationManager(config);
 			configManager.readConfiguration();
 
-			watcher = new FileWatcher(configManager.getConfig().getSettings().isUsingInode());
+			boolean usingInode = false;
+			if (configManager.getConfig().getSettings() != null) {
+				usingInode = configManager.getConfig().getSettings().isUsingInode();
+			}
+
+			if (usingInode) {
+				logger.info("file id in cache using inode");
+			} else {
+				logger.info("file id in cache using signature");
+			}
+
+			watcher = new FileWatcher(usingInode);
 			watcher.setMaxSignatureLength(signatureLength);
 			watcher.setTail(tailSelected);
 			watcher.setSincedb(sincedbFile);

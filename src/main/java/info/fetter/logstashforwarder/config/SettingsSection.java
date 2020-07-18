@@ -5,7 +5,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 public class SettingsSection {
     @JsonProperty("cache_id_using_inode")
-    private boolean usingInode = true;
+    private boolean usingInode = false;
 
     public boolean isUsingInode() {
         return usingInode;
