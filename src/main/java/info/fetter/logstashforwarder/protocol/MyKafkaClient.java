@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MyKafkaClient implements ProtocolAdapter {
     private final static Logger logger = Logger.getLogger(MyKafkaClient.class);
@@ -117,23 +118,42 @@ public class MyKafkaClient implements ProtocolAdapter {
     public int sendEvents(List<Event> eventList) throws AdapterException {
         try {
             int numberOfEvents = eventList.size();
-            if(logger.isInfoEnabled()) {
+            if(logger.isDebugEnabled()) {
 
                 if(null!=eventList && eventList.size()>0) {
                     String fileName="";
                     List<String> list =new ArrayList<>();
+                    Map<String,Integer> map  =new HashMap<>();
+                    //Map<String,List<Event>> mapHost =  eventList.stream().collect(Collectors.groupingBy());
+
                     for(int i=0;i<numberOfEvents;i++) {
                         byte[] fileNameByte = eventList.get(i).getValue("file");
                         fileName = new String(fileNameByte, charset);
                         if(!list.contains(fileName)){
                             list.add(fileName);
                         }
+                        if(map.containsKey(fileName)){
+                            Integer num =map.get(fileName);
+                            num++;
+                            map.put(fileName,num);
+                        }else
+                        {
+                            map.put(fileName,1);
+                        }
                     }
-                        fileName =String.join(",",list);
-                        logger.info("file: " + fileName + " Sending " + numberOfEvents + " events");
-                        System.out.println(GetUTCTimeUtil.getUTCTimeStr() + " file: " + fileName + " Sending " + numberOfEvents + " events");
+                    for (Map.Entry<String,Integer> item:map.entrySet()) {
+                        logger.info("file: " + item.getKey() + " Sending " + item.getValue() + " events");
+                    }
+                    fileName = String.join(",", list);
+                    logger.info("file: " + fileName + " Sending " + numberOfEvents + " events");
+                    System.out.println(GetUTCTimeUtil.getUTCTimeStr() + " file: " + fileName + " Sending " + numberOfEvents + " events");
                     }
                 }
+            if(logger.isInfoEnabled()) {
+                logger.info(" Sending " + numberOfEvents + " events");
+                System.out.println(GetUTCTimeUtil.getUTCTimeStr() +  " Sending " + numberOfEvents + " events");
+
+            }
 
             List<Map<String,byte[]>> keyValuesList = new ArrayList<Map<String,byte[]>>(numberOfEvents);
             for(Event event : eventList) {
