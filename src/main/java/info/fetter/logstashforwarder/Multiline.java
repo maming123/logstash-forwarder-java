@@ -24,7 +24,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 
 public class Multiline {
 	public enum WhatType { previous, next };
-	public static byte JOINT = (byte) '\n';
+	public static final byte JOINT = (byte) '\n';
 
 	private Pattern pattern = null;
 	private boolean negate = false;

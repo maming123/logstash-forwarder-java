@@ -1697,45 +1697,45 @@ public class RandomAccessFile implements DataInput, DataOutput {
    * @return true if found, file position will be at the start of the match.
    * @throws IOException on read error
    */
-  public boolean searchForward(KMPMatch match, int maxBytes) throws IOException {
-    long start = getFilePointer();
-    long last = (maxBytes < 0) ? length() : Math.min(length(), start + maxBytes);
-    long needToScan = last - start;
-
-    // check what ever is now in the buffer
-    int bytesAvailable = (int) (dataEnd - filePosition);
-    if (bytesAvailable < 1) {
-      seek(filePosition); // read a new buffer
-      bytesAvailable = (int) (dataEnd - filePosition);
-    }
-    int bufStart = (int) (filePosition - bufferStart);
-    int scanBytes = (int) Math.min(bytesAvailable, needToScan);
-    int pos = match.indexOf(buffer, bufStart, scanBytes);
-    if (pos >= 0) {
-      seek(bufferStart + pos);
-      return true;
-    }
-
-    int matchLen = match.getMatchLength();
-    needToScan -= scanBytes - matchLen;
-
-    while (needToScan > matchLen) {
-      readBuffer(dataEnd - matchLen); // force new buffer
-
-      scanBytes = (int) Math.min(buffer.length, needToScan);
-      pos = match.indexOf(buffer, 0, scanBytes);
-      if (pos > 0) {
-        seek(bufferStart + pos);
-        return true;
-      }
-
-      needToScan -= scanBytes - matchLen;
-    }
-
-    // failure
-    seek(last);
-    return false;
-  }
+//  public boolean searchForward(KMPMatch match, int maxBytes) throws IOException {
+//    long start = getFilePointer();
+//    long last = (maxBytes < 0) ? length() : Math.min(length(), start + maxBytes);
+//    long needToScan = last - start;
+//
+//    // check what ever is now in the buffer
+//    int bytesAvailable = (int) (dataEnd - filePosition);
+//    if (bytesAvailable < 1) {
+//      seek(filePosition); // read a new buffer
+//      bytesAvailable = (int) (dataEnd - filePosition);
+//    }
+//    int bufStart = (int) (filePosition - bufferStart);
+//    int scanBytes = (int) Math.min(bytesAvailable, needToScan);
+//    int pos = match.indexOf(buffer, bufStart, scanBytes);
+//    if (pos >= 0) {
+//      seek(bufferStart + pos);
+//      return true;
+//    }
+//
+//    int matchLen = match.getMatchLength();
+//    needToScan -= scanBytes - matchLen;
+//
+//    while (needToScan > matchLen) {
+//      readBuffer(dataEnd - matchLen); // force new buffer
+//
+//      scanBytes = (int) Math.min(buffer.length, needToScan);
+//      pos = match.indexOf(buffer, 0, scanBytes);
+//      if (pos > 0) {
+//        seek(bufferStart + pos);
+//        return true;
+//      }
+//
+//      needToScan -= scanBytes - matchLen;
+//    }
+//
+//    // failure
+//    seek(last);
+//    return false;
+//  }
 
 }
 
