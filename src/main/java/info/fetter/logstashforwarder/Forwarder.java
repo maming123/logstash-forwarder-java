@@ -30,6 +30,7 @@ import info.fetter.logstashforwarder.protocol.LumberjackClient;
 import info.fetter.logstashforwarder.protocol.StdoutClient;
 import info.fetter.logstashforwarder.util.AdapterException;
 
+import info.fetter.logstashforwarder.util.SignalHandlerCust;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -47,6 +48,8 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.spi.RootLogger;
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
 
 public class Forwarder {
 	private static final String SINCEDB = ".logstash-forwarder-java";
@@ -70,8 +73,16 @@ public class Forwarder {
 	private static int logfileNumber = 50;
 	private static String sincedbFile = SINCEDB;
 
+
 	public static void main(String[] args) {
 		try {
+
+			System.out.println("Signal handling example.");
+			SignalHandler handler = new SignalHandlerCust();
+			// kill -TERM 命令
+			Signal termSignal = new Signal("TERM");
+			Signal.handle(termSignal, handler);
+
 			parseOptions(args);
 			setupLogging();
 			configManager = new ConfigurationManager(config);
@@ -116,6 +127,8 @@ public class Forwarder {
 		}
 	}
 
+
+
 	private static void infiniteLoop() throws IOException, InterruptedException {
 		while(true) {
 			try {
@@ -127,6 +140,10 @@ public class Forwarder {
 				logger.info("watcher.readFiles(fileReader) end");
 				while(watcher.readStdin(inputReader) == spoolSize);
 				Thread.sleep(idleTimeout);
+				if(SignalHandlerCust.getKILLSIGNAL()==15){
+					System.out.println("infiniteLoop kill by number: " + SignalHandlerCust.getKILLSIGNAL());
+					break;
+				}
 			} catch(AdapterException e) {
 				logger.error("Lost server connection");
 				Thread.sleep(networkTimeout);
@@ -192,7 +209,7 @@ public class Forwarder {
 					}
 					try {
 						Thread.sleep(networkTimeout);
-					} catch (InterruptedException e) {
+					} catch (Exception e) {
 						logger.error(e.getMessage());
 					}
 				}
@@ -347,3 +364,5 @@ public class Forwarder {
 	}
 
 }
+
+
