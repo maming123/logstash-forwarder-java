@@ -1,6 +1,17 @@
 {
   "output": {
-    "stdout": {}
+    "stdout": {},
+    "kafka": {
+      "hosts": ["49.232.115.139:9092"],
+      "topic": "vbs2-log",
+      "charset": "GBK",
+      "acks": "0",
+      "retries": 0,
+      "batch_size": 16384,
+      "linger_ms": 1000,
+      "buffer_memory": 33554432,
+      "output2kafka":1
+    }
   },
   "files": [
     {
