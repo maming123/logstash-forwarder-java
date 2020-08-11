@@ -24,6 +24,11 @@ public class MyKafkaClient implements ProtocolAdapter {
     private String topic = "";
     private String charset="UTF-8";
     private Integer output2kafka=0;
+    /**
+     * 1：输出到kafka
+     */
+    private static final int OUTPUT2KAFKA2OK=1;
+    private static final int REQUEST_TIMEOUT_MS=30000;
 
     public MyKafkaClient(String hosts, String topic, String acks, Integer retries, Integer batchSize
             , Integer lingerMs, Integer bufferMemory, String charset, Integer output2kafka) {
@@ -50,7 +55,7 @@ public class MyKafkaClient implements ProtocolAdapter {
         //producer可以用来缓存数据的内存大小。33554432/(1024*1024)=32M,指定producer端用于缓存消息的缓冲区的大小，单位是字节，默认32M，采用异步发送消息的架构，Java版Producer启动时会首先创建一块内存缓冲区用于保存待发送消息，然后由另一个专属线程负责从缓冲区中读取消息执行真正的发送，这部分内存空间的大小就是由buffer.memory参数指定。该参数指定的内存大小几乎可以认为是producer程序使用的内存大小，若producer程序要给很多分区发送消息，那么就需要仔细设置该参数防止过小的内存缓冲区降低了producer程序整体的吞吐量 链接：https://www.jianshu.com/p/17ef8ab711e9
         props.put("buffer.memory", bufferMemory);//33554432
         //当producer发送请求给broker后，broker需要在规定时间范围内将处理结果返回给producer。超时时间默认30s
-        props.put("request.timeout.ms", 30000);
+        props.put("request.timeout.ms", REQUEST_TIMEOUT_MS);
         props.put("key.serializer",
                 "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer",
@@ -77,7 +82,7 @@ public class MyKafkaClient implements ProtocolAdapter {
         String json =JsonHelper.pureToJson(customMap);
 
         //send()方法是异步的，添加消息到缓冲区等待发送，并立即返回。这允许生产者将单个的消息批量在一起发送来提高效率
-        if (output2kafka.equals(1)) {
+        if (output2kafka.equals(OUTPUT2KAFKA2OK)) {
             // producer默认是异步的
             //Future<RecordMetadata> future = producer.send(new ProducerRecord<String, String>(topic, json));
             //如果加了get就变成了同步,也就是说要等待get到服务端返回的结果后再往下执行
