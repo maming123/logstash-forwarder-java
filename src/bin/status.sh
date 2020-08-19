@@ -4,7 +4,7 @@ base_dir="$(cd "$(dirname "$0")/.."; pwd)"
 
 echo ${base_dir}
 
-JAR_NAME="logstash-forwarder-java-0.2.7-SNAPSHOT.jar"
+JAR_NAME="logstash-forwarder-java-0.2.8-SNAPSHOT.jar"
 
 FULLNAME="${base_dir}/${JAR_NAME}"
 
