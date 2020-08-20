@@ -138,6 +138,7 @@ public class FileWatcher {
                     if (usingInode) {
                         if (oldState.getDevice() == state.getDevice() && oldState.getInode() == state.getInode()) {
                             state.setOldFileState(oldState);
+                            continue;
                         }
                     } else {
                         if (oldState.getSignatureLength() == state.getSignatureLength() && oldState.getSignature() == state.getSignature()) {

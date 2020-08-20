@@ -192,6 +192,10 @@ public class FileState {
 	public void deleteOldFileState() {
 		try {
 			oldFileState.getRandomAccessFile().close();
+			/* fix bug, 2020/08/20 hanyf
+			 * after file close, need set file state deleted
+			 **/
+			oldFileState.setDeleted();
 			oldFileState = null;
 		} catch(Exception e) {}
 	}
