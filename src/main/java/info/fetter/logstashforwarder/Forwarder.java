@@ -55,7 +55,7 @@ public class Forwarder {
 	private static final String SINCEDB = ".logstash-forwarder-java";
 	private static Logger logger = Logger.getLogger(Forwarder.class);
 	private static int spoolSize = 1024*4;
-	private static int idleTimeout = 2000;
+	private static int idleTimeout = 5000;
 	private static int networkTimeout = 15000;
 	private static String config;
 	private static ConfigurationManager configManager;
