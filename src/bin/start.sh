@@ -12,7 +12,7 @@ SINCEDBNAME="${base_dir}/conf/sincedb"
 
 JAVAOPS="-Xms2048m -Xmx2048m"
 FULLNAME="${base_dir}/${JAR_NAME}"
-PARAMS="-config ${CONFGI_NAME} -info -logfile ${LOGFILENAME} -logfilenumber 10 logfilesize 20MB -sincedb ${SINCEDBNAME} -spoolsize 10240 -tail"
+PARAMS="-config ${CONFGI_NAME} -info -logfile ${LOGFILENAME} -logfilenumber 10 logfilesize 20MB -sincedb ${SINCEDBNAME} -spoolsize 10240 -tail -idletimeout 5000"
 
 echo ${JAVAOPS}
 echo ${FULLNAME}
