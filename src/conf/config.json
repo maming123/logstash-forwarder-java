@@ -28,6 +28,14 @@
       "fields": { "type": "syslog", "sysid": "MacOS 64 bit" },
       "multiline": { "pattern": "^[0-9]{4}", "negate": "true" },
       "dead time": "1008h32m50s"
+    },
+    {
+      "paths": [
+        "/Users/maming/test/b/^[^.]+.log$"
+      ],
+      "fields": { "type": "syslog", "sysid": "MacOS 64 bit" },
+      "multiline": { "pattern": "^PUB:|^SHARE:", "negate": "false", "what": "next" },
+      "dead time": "1008h32m50s"
     }
   ],
   "settings": {
