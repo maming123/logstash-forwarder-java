@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -44,8 +45,15 @@ public class ConfigurationManager {
 	public void readConfiguration() throws JsonParseException, JsonMappingException, IOException {
 		config = mapper.readValue(configFile, Configuration.class);
 	}
-	
-	public void writeConfiguration() {
+
+	public String writeConfiguration(Configuration config) {
+		String josn =null;
+		try{
+			josn = mapper.writeValueAsString(config);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		return josn;
 	}
 
 	/**
