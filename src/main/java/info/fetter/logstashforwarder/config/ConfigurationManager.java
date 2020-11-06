@@ -47,13 +47,13 @@ public class ConfigurationManager {
 	}
 
 	public String writeConfiguration(Configuration config) {
-		String josn =null;
+		String jsonStr =null;
 		try{
-			josn = mapper.writeValueAsString(config);
+			jsonStr = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-		return josn;
+		return jsonStr;
 	}
 
 	/**

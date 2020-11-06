@@ -13,6 +13,7 @@ import java.nio.file.Files;
 public class SignatureTest {
     @Test
     public void testSignature() throws IOException {
+
         FileState state = new FileState(new File("SignatureTest.log"));
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000000; i++) {

@@ -87,7 +87,7 @@ public class Forwarder {
 			setupLogging();
 			configManager = new ConfigurationManager(config);
 			configManager.readConfiguration();
-
+			String str =configManager.writeConfiguration(configManager.getConfig());
 			boolean usingInode = false;
 			if (configManager.getConfig().getSettings() != null) {
 				usingInode = configManager.getConfig().getSettings().isUsingInode();

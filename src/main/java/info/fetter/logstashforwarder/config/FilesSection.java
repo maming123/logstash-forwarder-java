@@ -20,6 +20,7 @@ package info.fetter.logstashforwarder.config;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
@@ -58,6 +59,7 @@ public class FilesSection {
 		return deadTime;
 	}
 
+	@JsonIgnore
 	public long getDeadTimeInSeconds() {
 		long deadTimeInSeconds = 0;
 		String remaining = deadTime;

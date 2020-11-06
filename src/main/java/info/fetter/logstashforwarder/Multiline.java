@@ -20,6 +20,9 @@ package info.fetter.logstashforwarder;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 public class Multiline {
@@ -68,6 +71,7 @@ public class Multiline {
 		return what;
 	}
 
+	@JsonIgnore
 	public boolean isPrevious() {
 		return what == WhatType.previous;
 	}
