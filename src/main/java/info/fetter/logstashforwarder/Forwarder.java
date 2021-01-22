@@ -17,351 +17,333 @@ package info.fetter.logstashforwarder;
  *
  */
 
-import static org.apache.log4j.Level.*;
+import info.fetter.logstashforwarder.config.ConfigurationManager;
+import info.fetter.logstashforwarder.config.FilesSection;
+import info.fetter.logstashforwarder.protocol.LumberjackClient;
+import info.fetter.logstashforwarder.protocol.MyKafkaClient;
+import info.fetter.logstashforwarder.protocol.StdoutClient;
+import info.fetter.logstashforwarder.util.AdapterException;
+import info.fetter.logstashforwarder.util.SignalHandlerCust;
+import org.apache.commons.cli.*;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.log4j.*;
+import org.apache.log4j.spi.RootLogger;
+import sun.misc.Signal;
+import sun.misc.SignalHandler;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
-import info.fetter.logstashforwarder.config.ConfigurationManager;
-import info.fetter.logstashforwarder.config.FilesSection;
-import info.fetter.logstashforwarder.protocol.MyKafkaClient;
-import info.fetter.logstashforwarder.protocol.LumberjackClient;
-import info.fetter.logstashforwarder.protocol.StdoutClient;
-import info.fetter.logstashforwarder.util.AdapterException;
-
-import info.fetter.logstashforwarder.util.SignalHandlerCust;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.log4j.Appender;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Layout;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.RollingFileAppender;
-import org.apache.log4j.spi.RootLogger;
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
+import static org.apache.log4j.Level.*;
 
 public class Forwarder {
-	private static final String SINCEDB = ".logstash-forwarder-java";
-	private static Logger logger = Logger.getLogger(Forwarder.class);
-	private static int spoolSize = 1024*4;
-	private static int idleTimeout = 5000;
-	private static int networkTimeout = 15000;
-	private static String config;
-	private static ConfigurationManager configManager;
-	private static FileWatcher watcher;
-	private static FileReader fileReader;
-	private static InputReader inputReader;
-	private static Level logLevel = INFO;
-	private static boolean debugWatcherSelected = false;
-	private static ProtocolAdapter adapter;
-	private static Random random = new Random();
-	private static int signatureLength = 4096; //
-	private static boolean tailSelected = false;
-	private static String logfile = null;
-	private static String logfileSize = "10MB";
-	private static int logfileNumber = 50;
-	private static String sincedbFile = SINCEDB;
+    private static final String SINCEDB = ".logstash-forwarder-java";
+    private static Logger logger = Logger.getLogger(Forwarder.class);
+    private static int spoolSize = 1024 * 4;
+    private static int idleTimeout = 5000;
+    private static int networkTimeout = 15000;
+    private static String config;
+    private static ConfigurationManager configManager;
+    private static FileWatcher watcher;
+    private static FileReader fileReader;
+    private static InputReader inputReader;
+    private static Level logLevel = INFO;
+    private static boolean debugWatcherSelected = false;
+    private static ProtocolAdapter adapter;
+    private static Random random = new Random();
+    private static int signatureLength = 4096; //
+    private static boolean tailSelected = false;
+    private static String logfile = null;
+    private static String logfileSize = "10MB";
+    private static int logfileNumber = 50;
+    private static String sincedbFile = SINCEDB;
 
 
-	public static void main(String[] args) {
-		try {
+    public static void main(String[] args) {
+        try {
 
-			System.out.println("Signal handling example.");
-			SignalHandler handler = new SignalHandlerCust();
-			// kill -TERM 命令
-			Signal termSignal = new Signal("TERM");
-			Signal.handle(termSignal, handler);
+            System.out.println("Signal handling example.");
+            SignalHandler handler = new SignalHandlerCust();
+            // kill -TERM 命令
+            Signal termSignal = new Signal("TERM");
+            Signal.handle(termSignal, handler);
 
-			parseOptions(args);
-			setupLogging();
-			configManager = new ConfigurationManager(config);
-			configManager.readConfiguration();
-			String str =configManager.writeConfiguration(configManager.getConfig());
-			boolean usingInode = false;
-			if (configManager.getConfig().getSettings() != null) {
-				usingInode = configManager.getConfig().getSettings().isUsingInode();
-			}
+            parseOptions(args);
+            setupLogging();
+            configManager = new ConfigurationManager(config);
+            configManager.readConfiguration();
+            String str = configManager.writeConfiguration(configManager.getConfig());
+            boolean usingInode = false;
+            if (configManager.getConfig().getSettings() != null) {
+                usingInode = configManager.getConfig().getSettings().isUsingInode();
+            }
 
-			if (usingInode) {
-				logger.info("file id in cache using inode");
-			} else {
-				logger.info("file id in cache using signature");
-			}
+            if (usingInode) {
+                logger.info("file id in cache using inode");
+            } else {
+                logger.info("file id in cache using signature");
+            }
 
-			watcher = new FileWatcher(usingInode);
-			watcher.setMaxSignatureLength(signatureLength);
-			watcher.setTail(tailSelected);
-			watcher.setSincedb(sincedbFile);
-			int count=0;
-			logger.info("watcher.addFilesToWatch... start");
-			for(FilesSection files : configManager.getConfig().getFiles()) {
-				for(String path : files.getPaths()) {
-					watcher.addFilesToWatch(path, new Event(files.getFields()), files.getDeadTimeInSeconds() * 1000, files.getMultiline(), files.getFilter());
-					count++;
-					System.out.println("file number: "+ count +" filename: "+path);
-				}
-			}
-			logger.info("watcher.addFilesToWatch... end");
-			logger.info("watcher.initialize() start");
-			watcher.initialize();
-			logger.info("watcher.initialize() end");
+            watcher = new FileWatcher(usingInode);
+            watcher.setMaxSignatureLength(signatureLength);
+            watcher.setTail(tailSelected);
+            watcher.setSincedb(sincedbFile);
+            int count = 0;
+            logger.info("watcher.addFilesToWatch... start");
+            for (FilesSection files : configManager.getConfig().getFiles()) {
+                for (String path : files.getPaths()) {
+                    watcher.addFilesToWatch(path, new Event(files.getFields()), files.getDeadTimeInSeconds() * 1000, files.getMultiline(), files.getFilter());
+                    count++;
+                    System.out.println("file number: " + count + " filename: " + path);
+                }
+            }
+            logger.info("watcher.addFilesToWatch... end");
+            logger.info("watcher.initialize() start");
+            watcher.initialize();
+            logger.info("watcher.initialize() end");
 
-			fileReader = new FileReader(spoolSize);
-			inputReader = new InputReader(spoolSize, System.in);
-			connectToServer();
-			infiniteLoop();
-		} catch(Exception e) {
-			e.printStackTrace();
-			System.exit(3);
-		}
-	}
+            fileReader = new FileReader(spoolSize);
+            inputReader = new InputReader(spoolSize, System.in);
+            connectToServer();
+            infiniteLoop();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(3);
+        }
+    }
 
 
+    private static void infiniteLoop() throws IOException, InterruptedException {
+        while (true) {
+            try {
+                logger.info("watcher.checkFiles() start...");
+                watcher.checkFiles();
+                logger.info("watcher.checkFiles() complete...");
+                logger.info("watcher.readFiles(fileReader) begin");
+                while (watcher.readFiles(fileReader) == spoolSize) ;
+                logger.info("watcher.readFiles(fileReader) end");
+                while (watcher.readStdin(inputReader) == spoolSize) ;
+                Thread.sleep(idleTimeout);
+                if (SignalHandlerCust.getKILLSIGNAL() == 15) {
+                    System.out.println("infiniteLoop kill by number: " + SignalHandlerCust.getKILLSIGNAL());
+                    break;
+                }
+            } catch (AdapterException e) {
+                logger.error("Lost server connection: " + e.getMessage() + "\n" + ExceptionUtils.getStackTrace(e));
+                Thread.sleep(networkTimeout);
+                connectToServer();
+            }
+        }
+    }
 
-	private static void infiniteLoop() throws IOException, InterruptedException {
-		while(true) {
-			try {
-				logger.info("watcher.checkFiles() start...");
-				watcher.checkFiles();
-				logger.info("watcher.checkFiles() complete...");
-				logger.info("watcher.readFiles(fileReader) begin");
-				while(watcher.readFiles(fileReader) == spoolSize);
-				logger.info("watcher.readFiles(fileReader) end");
-				while(watcher.readStdin(inputReader) == spoolSize);
-				Thread.sleep(idleTimeout);
-				if(SignalHandlerCust.getKILLSIGNAL()==15){
-					System.out.println("infiniteLoop kill by number: " + SignalHandlerCust.getKILLSIGNAL());
-					break;
-				}
-			} catch(AdapterException e) {
-				logger.error("Lost server connection");
-				Thread.sleep(networkTimeout);
-				connectToServer();
-			}
-		}
-	}
+    private static void connectToServer() {
+        if (configManager.getConfig().getOutput().getStdout() != null) {
+            if (adapter == null) {
+                adapter = new StdoutClient();
+                fileReader.setAdapter(adapter);
+                inputReader.setAdapter(adapter);
+            }
+        } else if (configManager.getConfig().getOutput().getKafka() != null) {
+            logger.info("connectToServer: kafka adapter: " + adapter);
+            if (adapter == null) {
+                List<String> hostList = configManager.getConfig().getOutput().getKafka().getHosts();
+                String topic = configManager.getConfig().getOutput().getKafka().getTopic();
+                String acks = configManager.getConfig().getOutput().getKafka().getAcks();
+                Integer retries = configManager.getConfig().getOutput().getKafka().getRetries();
+                Integer batchSize = configManager.getConfig().getOutput().getKafka().getBatchSize();
+                Integer lingerMs = configManager.getConfig().getOutput().getKafka().getLingerMs();
+                Integer bufferMemory = configManager.getConfig().getOutput().getKafka().getBufferMemory();
+                String charset = configManager.getConfig().getOutput().getKafka().getCharset();
+                Integer output2kafka = configManager.getConfig().getOutput().getKafka().getOutput2kafka();
+                String hosts = String.join(",", hostList);
+                try {
+                    adapter = new MyKafkaClient(hosts, topic, acks, retries, batchSize, lingerMs, bufferMemory, charset, output2kafka);
+                    fileReader.setAdapter(adapter);
+                    inputReader.setAdapter(adapter);
+                } catch (Exception ex) {
+                    logger.error(ex);
+                }
+            }
+        } else if (configManager.getConfig().getOutput().getNetwork() != null) {
+            int randomServerIndex = 0;
+            List<String> serverList = configManager.getConfig().getOutput().getNetwork().getServers();
+            networkTimeout = configManager.getConfig().getOutput().getNetwork().getTimeout() * 1000;
+            if (adapter != null) {
+                try {
+                    adapter.close();
+                } catch (AdapterException e) {
+                    logger.error("Error while closing connection to " + adapter.getServer() + ":" + adapter.getPort());
+                } finally {
+                    adapter = null;
+                }
+            }
+            while (adapter == null) {
+                try {
+                    randomServerIndex = random.nextInt(serverList.size());
+                    String[] serverAndPort = serverList.get(randomServerIndex).split(":");
+                    logger.info("Trying to connect to " + serverList.get(randomServerIndex));
+                    adapter = new LumberjackClient(configManager.getConfig().getOutput().getNetwork().getSslCA(), serverAndPort[0], Integer.parseInt(serverAndPort[1]), networkTimeout);
+                    fileReader.setAdapter(adapter);
+                    inputReader.setAdapter(adapter);
+                } catch (Exception ex) {
+                    if (logger.isDebugEnabled()) {
+                        logger.error("Failed to connect to server " + serverList.get(randomServerIndex) + " : ", ex);
+                    } else {
+                        logger.error("Failed to connect to server " + serverList.get(randomServerIndex) + " : " + ex.getMessage());
+                    }
+                    try {
+                        Thread.sleep(networkTimeout);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage());
+                    }
+                }
+            }
+        }
+    }
 
-	private static void connectToServer() {
-		if (configManager.getConfig().getOutput().getStdout() != null) {
-			if (adapter == null) {
-				adapter = new StdoutClient();
-				fileReader.setAdapter(adapter);
-				inputReader.setAdapter(adapter);
-			}
-		}  else if (configManager.getConfig().getOutput().getKafka() != null) {
-			if (adapter == null) {
-				List<String> hostList = configManager.getConfig().getOutput().getKafka().getHosts();
-				String topic =configManager.getConfig().getOutput().getKafka().getTopic();
-				String acks =configManager.getConfig().getOutput().getKafka().getAcks();
-				Integer retries =configManager.getConfig().getOutput().getKafka().getRetries();
-				Integer batch_size =configManager.getConfig().getOutput().getKafka().getBatch_size();
-				Integer linger_ms =configManager.getConfig().getOutput().getKafka().getLinger_ms();
-				Integer buffer_memory =configManager.getConfig().getOutput().getKafka().getBuffer_memory();
-				String charset =configManager.getConfig().getOutput().getKafka().getCharset();
-				Integer output2kafka =configManager.getConfig().getOutput().getKafka().getOutput2kafka();
-				String hosts =String.join(",",hostList);
-				try {
-					adapter = new MyKafkaClient(hosts, topic, acks, retries, batch_size, linger_ms, buffer_memory, charset, output2kafka);
-					fileReader.setAdapter(adapter);
-					inputReader.setAdapter(adapter);
-				}catch (Exception ex){
+    @SuppressWarnings("static-access")
+    static void parseOptions(String[] args) {
+        Options options = new Options();
+        Option helpOption = new Option("help", "print this message");
+        Option quietOption = new Option("quiet", "operate in quiet mode - only emit errors to log");
+        Option debugOption = new Option("debug", "operate in debug mode");
+        Option debugWatcherOption = new Option("debugwatcher", "operate watcher in debug mode");
+        Option traceOption = new Option("trace", "operate in trace mode");
+        Option infoOption = new Option("info", "operate in info mode");
+        Option tailOption = new Option("tail", "read new files from the end");
 
-					logger.error(ex);
-				}
-			}
-		} else if (configManager.getConfig().getOutput().getNetwork() != null) {
-			int randomServerIndex = 0;
-			List<String> serverList = configManager.getConfig().getOutput().getNetwork().getServers();
-			networkTimeout = configManager.getConfig().getOutput().getNetwork().getTimeout() * 1000;
-			if (adapter != null) {
-				try {
-					adapter.close();
-				} catch (AdapterException e) {
-					logger.error("Error while closing connection to " + adapter.getServer() + ":" + adapter.getPort());
-				} finally {
-					adapter = null;
-				}
-			}
-			while (adapter == null) {
-				try {
-					randomServerIndex = random.nextInt(serverList.size());
-					String[] serverAndPort = serverList.get(randomServerIndex).split(":");
-					logger.info("Trying to connect to " + serverList.get(randomServerIndex));
-					adapter = new LumberjackClient(configManager.getConfig().getOutput().getNetwork().getSslCA(), serverAndPort[0], Integer.parseInt(serverAndPort[1]), networkTimeout);
-					fileReader.setAdapter(adapter);
-					inputReader.setAdapter(adapter);
-				} catch (Exception ex) {
-					if (logger.isDebugEnabled()) {
-						logger.error("Failed to connect to server " + serverList.get(randomServerIndex) + " : ", ex);
-					} else {
-						logger.error("Failed to connect to server " + serverList.get(randomServerIndex) + " : " + ex.getMessage());
-					}
-					try {
-						Thread.sleep(networkTimeout);
-					} catch (Exception e) {
-						logger.error(e.getMessage());
-					}
-				}
-			}
-		}
-	}
+        Option spoolSizeOption = OptionBuilder.withArgName("number of events")
+                .hasArg()
+                .withDescription("event count spool threshold - forces network flush")
+                .create("spoolsize");
+        Option idleTimeoutOption = OptionBuilder.withArgName("")
+                .hasArg()
+                .withDescription("time between file reads in seconds")
+                .create("idletimeout");
+        Option configOption = OptionBuilder.withArgName("config file")
+                .hasArg()
+                .isRequired()
+                .withDescription("path to logstash-forwarder configuration file")
+                .create("config");
+        Option signatureLengthOption = OptionBuilder.withArgName("signature length")
+                .hasArg()
+                .withDescription("Maximum length of file signature")
+                .create("signaturelength");
+        Option logfileOption = OptionBuilder.withArgName("logfile name")
+                .hasArg()
+                .withDescription("Logfile name")
+                .create("logfile");
+        Option logfileSizeOption = OptionBuilder.withArgName("logfile size")
+                .hasArg()
+                .withDescription("Logfile size (default 10M)")
+                .create("logfilesize");
+        Option logfileNumberOption = OptionBuilder.withArgName("number of logfiles")
+                .hasArg()
+                .withDescription("Number of logfiles (default 5)")
+                .create("logfilenumber");
+        Option sincedbOption = OptionBuilder.withArgName("sincedb file")
+                .hasArg()
+                .withDescription("Sincedb file name")
+                .create("sincedb");
 
-	@SuppressWarnings("static-access")
-	static void parseOptions(String[] args) {
-		Options options = new Options();
-		Option helpOption = new Option("help", "print this message");
-		Option quietOption = new Option("quiet", "operate in quiet mode - only emit errors to log");
-		Option debugOption = new Option("debug", "operate in debug mode");
-		Option debugWatcherOption = new Option("debugwatcher", "operate watcher in debug mode");
-		Option traceOption = new Option("trace", "operate in trace mode");
-		Option infoOption = new Option("info", "operate in info mode");
-		Option tailOption = new Option("tail", "read new files from the end");
+        options.addOption(helpOption)
+                .addOption(idleTimeoutOption)
+                .addOption(spoolSizeOption)
+                .addOption(quietOption)
+                .addOption(debugOption)
+                .addOption(debugWatcherOption)
+                .addOption(traceOption)
+                .addOption(tailOption)
+                .addOption(signatureLengthOption)
+                .addOption(configOption)
+                .addOption(logfileOption)
+                .addOption(logfileNumberOption)
+                .addOption(logfileSizeOption)
+                .addOption(sincedbOption)
+                .addOption(infoOption);
 
-		Option spoolSizeOption = OptionBuilder.withArgName("number of events")
-				.hasArg()
-				.withDescription("event count spool threshold - forces network flush")
-				.create("spoolsize");
-		Option idleTimeoutOption = OptionBuilder.withArgName("")
-				.hasArg()
-				.withDescription("time between file reads in seconds")
-				.create("idletimeout");
-		Option configOption = OptionBuilder.withArgName("config file")
-				.hasArg()
-				.isRequired()
-				.withDescription("path to logstash-forwarder configuration file")
-				.create("config");
-		Option signatureLengthOption = OptionBuilder.withArgName("signature length")
-				.hasArg()
-				.withDescription("Maximum length of file signature")
-				.create("signaturelength");
-		Option logfileOption = OptionBuilder.withArgName("logfile name")
-				.hasArg()
-				.withDescription("Logfile name")
-				.create("logfile");
-		Option logfileSizeOption = OptionBuilder.withArgName("logfile size")
-				.hasArg()
-				.withDescription("Logfile size (default 10M)")
-				.create("logfilesize");
-		Option logfileNumberOption = OptionBuilder.withArgName("number of logfiles")
-				.hasArg()
-				.withDescription("Number of logfiles (default 5)")
-				.create("logfilenumber");
-		Option sincedbOption = OptionBuilder.withArgName("sincedb file")
-				.hasArg()
-				.withDescription("Sincedb file name")
-				.create("sincedb");
+        CommandLineParser parser = new GnuParser();
+        try {
+            CommandLine line = parser.parse(options, args);
+            if (line.hasOption("spoolsize")) {
+                spoolSize = Integer.parseInt(line.getOptionValue("spoolsize"));
+            }
+            if (line.hasOption("idletimeout")) {
+                idleTimeout = Integer.parseInt(line.getOptionValue("idletimeout"));
+            }
+            if (line.hasOption("config")) {
+                config = line.getOptionValue("config");
+            }
+            if (line.hasOption("signaturelength")) {
+                signatureLength = Integer.parseInt(line.getOptionValue("signaturelength"));
+            }
+            if (line.hasOption("quiet")) {
+                logLevel = ERROR;
+            }
 
-		options.addOption(helpOption)
-		.addOption(idleTimeoutOption)
-		.addOption(spoolSizeOption)
-		.addOption(quietOption)
-		.addOption(debugOption)
-		.addOption(debugWatcherOption)
-		.addOption(traceOption)
-		.addOption(tailOption)
-		.addOption(signatureLengthOption)
-		.addOption(configOption)
-		.addOption(logfileOption)
-		.addOption(logfileNumberOption)
-		.addOption(logfileSizeOption)
-		.addOption(sincedbOption)
-		.addOption(infoOption);
+            if (line.hasOption("info")) {
+                logLevel = INFO;
+            }
+            if (line.hasOption("debug")) {
+                logLevel = DEBUG;
+            }
+            if (line.hasOption("trace")) {
+                logLevel = TRACE;
+            }
 
-		CommandLineParser parser = new GnuParser();
-		try {
-			CommandLine line = parser.parse(options, args);
-			if(line.hasOption("spoolsize")) {
-				spoolSize = Integer.parseInt(line.getOptionValue("spoolsize"));
-			}
-			if(line.hasOption("idletimeout")) {
-				idleTimeout = Integer.parseInt(line.getOptionValue("idletimeout"));
-			}
-			if(line.hasOption("config")) {
-				config = line.getOptionValue("config");
-			}
-			if(line.hasOption("signaturelength")) {
-				signatureLength = Integer.parseInt(line.getOptionValue("signaturelength"));
-			}
-			if(line.hasOption("quiet")) {
-				logLevel = ERROR;
-			}
+            if (line.hasOption("debugwatcher")) {
+                debugWatcherSelected = true;
+            }
+            if (line.hasOption("tail")) {
+                tailSelected = true;
+            }
+            if (line.hasOption("logfile")) {
+                logfile = line.getOptionValue("logfile");
+            }
+            if (line.hasOption("logfilesize")) {
+                logfileSize = line.getOptionValue("logfilesize");
+            }
+            if (line.hasOption("logfilenumber")) {
+                logfileNumber = Integer.parseInt(line.getOptionValue("logfilenumber"));
+            }
+            if (line.hasOption("sincedb")) {
+                sincedbFile = line.getOptionValue("sincedb");
+            }
+        } catch (ParseException e) {
+            printHelp(options);
+            System.exit(1);
+        } catch (NumberFormatException e) {
+            System.err.println("Value must be an integer");
+            printHelp(options);
+            System.exit(2);
+        }
+    }
 
-			if(line.hasOption("info")) {
-				logLevel = INFO;
-			}
-			if(line.hasOption("debug")) {
-				logLevel = DEBUG;
-			}
-			if(line.hasOption("trace")) {
-				logLevel = TRACE;
-			}
+    private static void printHelp(Options options) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("logstash-forwarder", options);
+    }
 
-			if(line.hasOption("debugwatcher")) {
-				debugWatcherSelected = true;
-			}
-			if(line.hasOption("tail")) {
-				tailSelected = true;
-			}
-			if(line.hasOption("logfile")) {
-				logfile = line.getOptionValue("logfile");
-			}
-			if(line.hasOption("logfilesize")) {
-				logfileSize = line.getOptionValue("logfilesize");
-			}
-			if(line.hasOption("logfilenumber")) {
-				logfileNumber = Integer.parseInt(line.getOptionValue("logfilenumber"));
-			}
-			if(line.hasOption("sincedb")) {
-				sincedbFile = line.getOptionValue("sincedb");
-			}
-		} catch(ParseException e) {
-			printHelp(options);
-			System.exit(1);;
-		} catch(NumberFormatException e) {
-			System.err.println("Value must be an integer");
-			printHelp(options);
-			System.exit(2);;
-		}
-	}
-
-	private static void printHelp(Options options) {
-		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("logstash-forwarder", options);
-	}
-
-	private static void setupLogging() throws IOException {
-		Appender appender;
-		Layout layout = new PatternLayout("%d %p %c{1} - %m%n");
-		if(logfile == null) {
-			appender = new ConsoleAppender(layout);
-		} else {
-			RollingFileAppender rolling = new RollingFileAppender(layout, logfile, true);
-			rolling.setMaxFileSize(logfileSize);
-			rolling.setMaxBackupIndex(logfileNumber);
-			appender = rolling;
-		}
-		BasicConfigurator.configure(appender);
-		RootLogger.getRootLogger().setLevel(logLevel);
-		if(debugWatcherSelected) {
-			Logger.getLogger(FileWatcher.class).addAppender(appender);
-			Logger.getLogger(FileWatcher.class).setLevel(DEBUG);
-			Logger.getLogger(FileWatcher.class).setAdditivity(false);
-		}
-		//			Logger.getLogger(FileReader.class).addAppender((Appender)RootLogger.getRootLogger().getAllAppenders().nextElement());
-		//			Logger.getLogger(FileReader.class).setLevel(TRACE);
-		//			Logger.getLogger(FileReader.class).setAdditivity(false);
-	}
+    private static void setupLogging() throws IOException {
+        Appender appender;
+        Layout layout = new PatternLayout("%d %p %c{1} - %m%n");
+        if (logfile == null) {
+            appender = new ConsoleAppender(layout);
+        } else {
+            RollingFileAppender rolling = new RollingFileAppender(layout, logfile, true);
+            rolling.setMaxFileSize(logfileSize);
+            rolling.setMaxBackupIndex(logfileNumber);
+            appender = rolling;
+        }
+        BasicConfigurator.configure(appender);
+        RootLogger.getRootLogger().setLevel(logLevel);
+        if (debugWatcherSelected) {
+            Logger.getLogger(FileWatcher.class).addAppender(appender);
+            Logger.getLogger(FileWatcher.class).setLevel(DEBUG);
+            Logger.getLogger(FileWatcher.class).setAdditivity(false);
+        }
+    }
 
 }
 
