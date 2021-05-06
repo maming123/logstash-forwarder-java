@@ -22,8 +22,7 @@ import info.fetter.logstashforwarder.config.FilesSection;
 import info.fetter.logstashforwarder.protocol.LumberjackClient;
 import info.fetter.logstashforwarder.protocol.MyKafkaClient;
 import info.fetter.logstashforwarder.protocol.StdoutClient;
-import info.fetter.logstashforwarder.util.AdapterException;
-import info.fetter.logstashforwarder.util.SignalHandlerCust;
+import info.fetter.logstashforwarder.util.*;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.*;
@@ -32,8 +31,7 @@ import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static org.apache.log4j.Level.*;
 
@@ -42,6 +40,8 @@ public class Forwarder {
     private static Logger logger = Logger.getLogger(Forwarder.class);
     private static int spoolSize = 1024 * 4;
     private static int idleTimeout = 5000;
+    //初始空闲时间
+    private static int idleTimeoutInit = 5000;
     private static int networkTimeout = 15000;
     private static String config;
     private static ConfigurationManager configManager;
@@ -60,7 +60,9 @@ public class Forwarder {
     private static String sincedbFile = SINCEDB;
 
 
+
     public static void main(String[] args) {
+
         try {
 
             System.out.println("Signal handling example.");
@@ -84,6 +86,15 @@ public class Forwarder {
             } else {
                 logger.info("file id in cache using signature");
             }
+
+            //延迟10秒后启动timer，然后每间隔5秒运行
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                public void run() {
+                    //从proxy获取cpu和内存的状态结果，看是否需要限速
+                    getSpeedLimitStatusFromProxy();
+                }
+            }, 10000 , 30000);
 
             watcher = new FileWatcher(usingInode);
             watcher.setMaxSignatureLength(signatureLength);
@@ -111,6 +122,7 @@ public class Forwarder {
             e.printStackTrace();
             System.exit(3);
         }
+
     }
 
 
@@ -271,6 +283,7 @@ public class Forwarder {
             }
             if (line.hasOption("idletimeout")) {
                 idleTimeout = Integer.parseInt(line.getOptionValue("idletimeout"));
+                idleTimeoutInit =idleTimeout;
             }
             if (line.hasOption("config")) {
                 config = line.getOptionValue("config");
@@ -343,6 +356,41 @@ public class Forwarder {
             Logger.getLogger(FileWatcher.class).setLevel(DEBUG);
             Logger.getLogger(FileWatcher.class).setAdditivity(false);
         }
+    }
+
+    private static void getSpeedLimitStatusFromProxy(){
+
+       String url ="http://localhost:8911/lam-proxy/proxyController/getSpeedLimitStatus";
+
+           try {
+               boolean enabledSpeedLimit = configManager.getConfig().getSettings().getEnabledSpeedLimit();
+               idleTimeout =idleTimeoutInit;
+               if(enabledSpeedLimit) {
+                   String str = HttpClientUtil.get(url);
+
+                   ReturnJsonType json = JsonHelper.fromJson(str, ReturnJsonType.class);
+                   //resCode=0，object 前一位 是 -1,0,0,0： "未开启指标采集,object 第二位是限制日志采集时间（秒），第三位cpuused，第四位memoryused"
+                   //resCode=0，object 前一位 是 0,0,0,0： "指标正常"
+                   //resCode=0，object 前一位 是 1,0,0,0： "指标超限，采取限流措施"
+                   //resCode=1，获取代理url失败
+                   logger.debug(url+"  response: "+str);
+                   String v = json.getData().toString().split(",")[0];
+                   if (json.getResCode().equals(ExceptionEnum.SUCESS.getStatus())) {
+                       if (v.equals("1")) {
+                           String idleTime =json.getData().toString().split(",")[1];
+
+                           idleTimeout = Integer.parseInt(idleTime)*1000;
+                           logger.info("speed limit [" + idleTimeout + "] millisecond ");
+                       }
+                   }
+               }else {
+                   logger.debug("enabledSpeedLimit status is close，if need open please set enabled_speed_limit : true");
+               }
+           } catch (Exception ex) {
+               logger.error(url + " error: " + ex.getMessage());
+               //System.exit(4);
+           }
+
     }
 
 }

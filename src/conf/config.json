@@ -39,6 +39,7 @@
     }
   ],
   "settings": {
-    "cache_id_using_inode": true
+    "cache_id_using_inode": true,
+    "enabled_speed_limit": true
   }
 }
