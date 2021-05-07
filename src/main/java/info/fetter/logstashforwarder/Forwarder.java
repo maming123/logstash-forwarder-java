@@ -24,13 +24,16 @@ import info.fetter.logstashforwarder.protocol.MyKafkaClient;
 import info.fetter.logstashforwarder.protocol.StdoutClient;
 import info.fetter.logstashforwarder.util.*;
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.*;
 import org.apache.log4j.spi.RootLogger;
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 
 import static org.apache.log4j.Level.*;
@@ -58,13 +61,13 @@ public class Forwarder {
     private static String logfileSize = "10MB";
     private static int logfileNumber = 50;
     private static String sincedbFile = SINCEDB;
+    private static int proxyPort=0;
 
 
 
     public static void main(String[] args) {
 
         try {
-
             System.out.println("Signal handling example.");
             SignalHandler handler = new SignalHandlerCust();
             // kill -TERM 命令
@@ -87,14 +90,21 @@ public class Forwarder {
                 logger.info("file id in cache using signature");
             }
 
-            //延迟10秒后启动timer，然后每间隔5秒运行
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                public void run() {
-                    //从proxy获取cpu和内存的状态结果，看是否需要限速
-                    getSpeedLimitStatusFromProxy();
-                }
-            }, 10000 , 30000);
+            //是否启动
+            getProxyPort();
+            if(proxyPort>0) {
+                //延迟10秒后启动timer，然后每间隔5秒运行
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    public void run() {
+                        //从proxy获取cpu和内存的状态结果，看是否需要限速
+                        getSpeedLimitStatusFromProxy();
+                    }
+                }, 10000, 30000);
+            }else{
+                logger.info( "because get proxyPort failed, so getSpeedLimitStatusFromProxy api not run,please check proxy config application.yml");
+            }
+            //
 
             watcher = new FileWatcher(usingInode);
             watcher.setMaxSignatureLength(signatureLength);
@@ -360,8 +370,7 @@ public class Forwarder {
 
     private static void getSpeedLimitStatusFromProxy(){
 
-       String url ="http://localhost:8911/lam-proxy/proxyController/getSpeedLimitStatus";
-
+           String url ="http://localhost:"+proxyPort+"/lam-proxy/proxyController/getSpeedLimitStatus";
            try {
                boolean enabledSpeedLimit = configManager.getConfig().getSettings().getEnabledSpeedLimit();
                idleTimeout =idleTimeoutInit;
@@ -391,6 +400,22 @@ public class Forwarder {
                //System.exit(4);
            }
 
+    }
+
+    private static void getProxyPort() {
+        String userDir = System.getProperty("user.dir");
+        int ii = userDir.lastIndexOf("/");
+        String proxyApplicationYml = userDir.substring(0, ii) + "/conf/application.yml";
+        System.out.println("proxyApplicationYml " + proxyApplicationYml);
+        File file = new File(proxyApplicationYml);
+        if (file.exists()) {
+            Map<String, Object> map = Utils.findAndReadConfigFile(proxyApplicationYml);
+            System.out.println("map" + JsonHelper.toJson(map));
+            proxyPort = Integer.parseInt(((HashMap) map.get("server")).get("port").toString());
+
+        } else {
+            logger.info(proxyApplicationYml + " is not exist");
+        }
     }
 
 }
