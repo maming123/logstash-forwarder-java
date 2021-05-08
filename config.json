@@ -19,7 +19,7 @@
       "paths": [
         "/Users/maming/Downloads/a/1.log"
       ],
-      "fields": { "type": "syslog", "sysid": "MacOS 64 bit" },
+      "fields": { "type": "syslog", "sysid": "MacOS 64 bit" }
 
     }
   ]
