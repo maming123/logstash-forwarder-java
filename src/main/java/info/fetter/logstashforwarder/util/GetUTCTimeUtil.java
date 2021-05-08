@@ -15,7 +15,7 @@ import java.util.TimeZone;
  */
 public final class GetUTCTimeUtil {
 
-    private static DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") ;
+    private  DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss") ;
 
     /**
      * 得到UTC时间，类型为字符串，格式为"yyyy-MM-dd HH:mm:ss"<br />
@@ -32,7 +32,7 @@ public final class GetUTCTimeUtil {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         //System.out.println(sdf.getTimeZone());
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        System.out.println(sdf.format(now));
+        //System.out.println(sdf.format(now));
         return sdf.format(now);
     }
 

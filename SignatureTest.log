@@ -1,0 +1,35 @@
+2020-07-09T02:07:49.749+0800	INFO	instance/beat.go:647	Home path: [/tmp/filebeat-7.8.0-darwin-x86_64] Config path: [/tmp/filebeat-7.8.0-darwin-x86_64] Data path: [/tmp/filebeat-7.8.0-darwin-x86_64/data] Logs path: [/tmp/filebeat-7.8.0-darwin-x86_64/logs]
+2020-07-09T02:07:49.750+0800	INFO	instance/beat.go:655	Beat ID: fd0c77f2-9186-4fbb-82b5-9400bc5eb80e
+2020-07-09T02:07:49.752+0800	INFO	[beat]	instance/beat.go:983	Beat info	{"system_info": {"beat": {"path": {"config": "/tmp/filebeat-7.8.0-darwin-x86_64", "data": "/tmp/filebeat-7.8.0-darwin-x86_64/data", "home": "/tmp/filebeat-7.8.0-darwin-x86_64", "logs": "/tmp/filebeat-7.8.0-darwin-x86_64/logs"}, "type": "filebeat", "uuid": "fd0c77f2-9186-4fbb-82b5-9400bc5eb80e"}}}
+2020-07-09T02:07:49.752+0800	INFO	[beat]	instance/beat.go:992	Build info	{"system_info": {"build": {"commit": "f79387d32717d79f689d94fda1ec80b2cf285d30", "libbeat": "7.8.0", "time": "2020-06-14T17:24:54.000Z", "version": "7.8.0"}}}
+2020-07-09T02:07:49.752+0800	INFO	[beat]	instance/beat.go:995	Go runtime info	{"system_info": {"go": {"os":"darwin","arch":"amd64","max_procs":8,"version":"go1.13.10"}}}
+2020-07-09T02:07:49.752+0800	INFO	[beat]	instance/beat.go:999	Host info	{"system_info": {"host": {"architecture":"x86_64","boot_time":"2020-07-09T01:40:28.579707+08:00","name":"MacBookPro","ip":["127.0.0.1/8","::1/128","fe80::1/64","fe80::aede:48ff:fe00:1122/64","172.20.10.9/28","fe80::1822:eff:fe75:9cbf/64","fe80::1822:eff:fe75:9cbf/64","fe80::c80a:4a59:8b6:78e2/64","fe80::cf3d:a1f3:6413:ef3b/64","172.31.16.1/24"],"kernel_version":"19.5.0","mac":["ac:de:48:00:11:22","8c:85:90:b9:5b:9a","da:1d:72:5c:52:da","82:0e:75:63:d4:01","82:0e:75:63:d4:00","82:0e:75:63:d4:05","82:0e:75:63:d4:04","00:e0:4c:68:00:32","82:0e:75:63:d4:01","0e:85:90:b9:5b:9a","1a:22:0e:75:9c:bf","1a:22:0e:75:9c:bf"],"os":{"family":"darwin","platform":"darwin","name":"Mac OS X","version":"10.15.5","major":10,"minor":15,"patch":5,"build":"19F101"},"timezone":"CST","timezone_offset_sec":28800,"id":"98861033-8867-5F2C-A273-8959D14901D6"}}}
+2020-07-09T02:07:49.752+0800	INFO	[beat]	instance/beat.go:1028	Process info	{"system_info": {"process": {"cwd": "/tmp/filebeat-7.8.0-darwin-x86_64", "exe": "filebeat", "name": "filebeat", "pid": 26482, "ppid": 17672, "start_time": "2020-07-09T02:07:49.675+0800"}}}
+2020-07-09T02:07:49.752+0800	INFO	instance/beat.go:310	Setup Beat: filebeat; Version: 7.8.0
+2020-07-09T02:07:49.753+0800	INFO	[index-management]	idxmgmt/std.go:183	Set output.elasticsearch.index to 'filebeat-7.8.0' as ILM is enabled.
+2020-07-09T02:07:49.753+0800	INFO	eslegclient/connection.go:97	elasticsearch url: http://localhost:9200
+2020-07-09T02:07:49.753+0800	INFO	[publisher]	pipeline/module.go:113	Beat name: MacBookPro
+2020-07-09T02:07:49.754+0800	INFO	eslegclient/connection.go:97	elasticsearch url: http://localhost:9200
+2020-07-09T02:07:49.756+0800	INFO	[esclientleg]	eslegclient/connection.go:306	Attempting to connect to Elasticsearch version 7.8.0-SNAPSHOT
+2020-07-09T02:07:49.759+0800	INFO	template/load.go:169	Existing template will be overwritten, as overwrite is enabled.
+2020-07-09T02:07:49.827+0800	INFO	template/load.go:109	Try loading template filebeat-7.8.0 to Elasticsearch
+2020-07-09T02:07:49.886+0800	INFO	template/load.go:101	template with name 'filebeat-7.8.0' loaded.
+2020-07-09T02:07:49.886+0800	INFO	[index-management]	idxmgmt/std.go:296	Loaded index template.
+2020-07-09T02:07:49.886+0800	INFO	kibana/client.go:118	Kibana url: http://localhost:5603/emv
+2020-07-09T02:07:50.017+0800	INFO	kibana/client.go:118	Kibana url: http://localhost:5603/emv
+2020-07-09T02:07:52.751+0800	INFO	[add_cloud_metadata]	add_cloud_metadata/add_cloud_metadata.go:89	add_cloud_metadata: hosting provider type not detected.
+2020-07-09T02:08:18.286+0800	INFO	instance/beat.go:817	Kibana dashboards successfully loaded.
+2020-07-09T02:08:18.286+0800	WARN	[cfgwarn]	instance/beat.go:564	DEPRECATED: Setting up ML using Filebeat is going to be removed. Please use the ML app to setup jobs. Will be removed in version: 8.0.0
+2020-07-09T02:08:18.288+0800	INFO	eslegclient/connection.go:97	elasticsearch url: http://localhost:9200
+2020-07-09T02:08:18.290+0800	INFO	[esclientleg]	eslegclient/connection.go:306	Attempting to connect to Elasticsearch version 7.8.0-SNAPSHOT
+2020-07-09T02:08:18.291+0800	INFO	kibana/client.go:118	Kibana url: http://localhost:5603/emv
+2020-07-09T02:08:18.297+0800	WARN	fileset/modules.go:421	X-Pack Machine Learning is not enabled
+2020-07-09T02:08:18.305+0800	WARN	fileset/modules.go:421	X-Pack Machine Learning is not enabled
+2020-07-09T02:08:18.305+0800	INFO	eslegclient/connection.go:97	elasticsearch url: http://localhost:9200
+2020-07-09T02:08:18.308+0800	INFO	[esclientleg]	eslegclient/connection.go:306	Attempting to connect to Elasticsearch version 7.8.0-SNAPSHOT
+2020-07-09T02:08:18.309+0800	INFO	eslegclient/connection.go:97	elasticsearch url: http://localhost:9200
+2020-07-09T02:08:18.312+0800	INFO	[esclientleg]	eslegclient/connection.go:306	Attempting to connect to Elasticsearch version 7.8.0-SNAPSHOT
+2020-07-09T02:08:18.686+0800	INFO	fileset/pipelines.go:134	Elasticsearch pipeline with ID 'filebeat-7.8.0-system-auth-pipeline' loaded
+2020-07-09T02:08:18.765+0800	INFO	fileset/pipelines.go:134	Elasticsearch pipeline with ID 'filebeat-7.8.0-system-syslog-pipeline' loaded
+2020-07-09T02:08:18.765+0800	INFO	cfgfile/reload.go:262	Loading of config files completed.
+2020-07-09T02:08:18.765+0800	INFO	[load]	cfgfile/list.go:118	Stopping 1 runners ...

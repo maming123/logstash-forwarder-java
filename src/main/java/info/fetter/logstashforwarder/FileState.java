@@ -44,6 +44,9 @@ public class FileState {
 	private boolean deleted = false;
 	private long signature;
 	private int signatureLength;
+	/* inode support */
+	private long inode;
+	private long device;
 	@JsonIgnore
 	private boolean changed = false;
 	@JsonIgnore
@@ -137,6 +140,22 @@ public class FileState {
 		return signature;
 	}
 
+	public long getInode() {
+		return inode;
+	}
+
+	public void setInode(long inode) {
+		this.inode = inode;
+	}
+
+	public long getDevice() {
+		return device;
+	}
+
+	public void setDevice(long device) {
+		this.device = device;
+	}
+
 	public void setSignature(long signature) {
 		this.signature = signature;
 	}
@@ -173,6 +192,10 @@ public class FileState {
 	public void deleteOldFileState() {
 		try {
 			oldFileState.getRandomAccessFile().close();
+			/* fix bug, 2020/08/20 hanyf
+			 * after file close, need set file state deleted
+			 **/
+			oldFileState.setDeleted();
 			oldFileState = null;
 		} catch(Exception e) {}
 	}

@@ -1,0 +1,45 @@
+{
+  "output": {
+    "kafka": {
+      "hosts": ["49.232.115.139:9092"],
+      "topic": "test5",
+      "charset": "GBK",
+      "acks": "0",
+      "retries": 0,
+      "batch_size": 16384,
+      "linger_ms": 1000,
+      "buffer_memory": 33554432,
+      "output2kafka":1
+    }
+  },
+  "files": [
+    {
+      "paths": [
+        "/Users/maming/test/c/^[^.]+.log$"
+      ],
+      "fields": { "type": "syslog", "sysid": "MacOS 64 bit" },
+      "multiline": { "pattern": "^PUB:|^SHARE:", "negate": "false", "what": "next" },
+      "dead time": "1008h32m50s"
+    },
+    {
+      "paths": [
+        "/Users/maming/test/a/1.log"
+      ],
+      "fields": { "type": "syslog", "sysid": "MacOS 64 bit" },
+      "multiline": { "pattern": "^PUB:|^SHARE:", "negate": "false", "what": "next" },
+      "dead time": "1008h32m50s"
+    },
+    {
+      "paths": [
+        "/Users/maming/test/b/^[^.]+.log$"
+      ],
+      "fields": { "type": "syslog", "sysid": "MacOS 64 bit" },
+      "multiline": { "pattern": "^PUB:|^SHARE:", "negate": "false", "what": "next" },
+      "dead time": "1008h32m50s"
+    }
+  ],
+  "settings": {
+    "cache_id_using_inode": true,
+    "enabled_speed_limit": true
+  }
+}

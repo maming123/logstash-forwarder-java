@@ -20,11 +20,14 @@ package info.fetter.logstashforwarder;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 public class Multiline {
 	public enum WhatType { previous, next };
-	public static byte JOINT = (byte) '\n';
+	public static final byte JOINT = (byte) '\n';
 
 	private Pattern pattern = null;
 	private boolean negate = false;
@@ -68,6 +71,7 @@ public class Multiline {
 		return what;
 	}
 
+	@JsonIgnore
 	public boolean isPrevious() {
 		return what == WhatType.previous;
 	}

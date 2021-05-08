@@ -21,10 +21,18 @@ import static org.apache.log4j.Level.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+import info.fetter.logstashforwarder.util.LastModifiedFileFilter;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.RootLogger;
@@ -48,7 +56,7 @@ public class FileWatcherTest {
 
 	//@Test
 	public void testFileWatch() throws InterruptedException, IOException {
-		FileWatcher watcher = new FileWatcher();
+		FileWatcher watcher = new FileWatcher(true);
 		watcher.addFilesToWatch("./test.txt", new Event().addField("test", "test"), FileWatcher.ONE_DAY, null, null);
 		for(int i = 0; i < 100; i++) {
 			Thread.sleep(1000);
@@ -58,7 +66,7 @@ public class FileWatcherTest {
 
 	//@Test
 	public void testFileWatchWithMultilines() throws InterruptedException, IOException {
-		FileWatcher watcher = new FileWatcher();
+		FileWatcher watcher = new FileWatcher(true);
 		Multiline multiline = new Multiline();
 		watcher.addFilesToWatch("./test.txt", new Event().addField("test", "test"), FileWatcher.ONE_DAY, multiline, null);
 		for(int i = 0; i < 100; i++) {
@@ -73,7 +81,7 @@ public class FileWatcherTest {
 			logger.warn("Not executing this test on windows");
 			return;
 		}
-		FileWatcher watcher = new FileWatcher();
+		FileWatcher watcher = new FileWatcher(true);
 		watcher.addFilesToWatch("./testFileWatcher*.txt", new Event().addField("test", "test"), FileWatcher.ONE_DAY, null, null);
 		watcher.initialize();
 
@@ -118,7 +126,7 @@ public class FileWatcherTest {
 			logger.warn("Not executing this test on windows");
 			return;
 		}
-		FileWatcher watcher = new FileWatcher();
+		FileWatcher watcher = new FileWatcher(true);
                 Map<String, String> m = new HashMap<String, String>();
                 m.put("pattern", " nl");
                 m.put("negate", "false");
@@ -160,6 +168,40 @@ public class FileWatcherTest {
 		FileUtils.deleteQuietly(file2);
 //		FileUtils.forceDelete(testDir);
 
+
+
+	}
+
+	@Test
+	public void testRegexWatch() throws InterruptedException, IOException {
+		if(System.getProperty("os.name").toLowerCase().contains("win")) {
+			logger.warn("Not executing this test on windows");
+			return;
+		}
+		//不要的文件
+		//String fileToWarth="/Users/maming/test/c/^[0-9]+.log";
+		//String fileToWarth="/Users/maming/test/c/^d_[0-9]+_[0-9]+.log";
+		String fileToWarth="/Users/maming/test/c/^[^.]+.log$"; //不包含.的任意字符
+//		RegexFileFilter regex2 = new RegexFileFilter("^[0-9]+.log");
+//		boolean bbb =Pattern.compile("^[2-9]+.log").matcher("1.log").matches();
+//		boolean bb = regex2.accept(new File("/Users/maming/test/c/1.log"));
+		String directory = FilenameUtils.getFullPath(fileToWarth);
+		String regex = FilenameUtils.getName(fileToWarth);
+		logger.trace("Directory : " + new File(directory).getCanonicalPath() + ", regex : " + regex);
+		IOFileFilter fileFilter = FileFilterUtils.and(
+				FileFilterUtils.fileFileFilter(),
+				new RegexFileFilter(regex),
+				new LastModifiedFileFilter(FileWatcher.ONE_DAY));
+		File dir =new File(directory);
+
+
+		Collection<File> collection = FileUtils.listFiles(dir, fileFilter, null);
+		//FileWatcher watcher = new FileWatcher();
+		//watcher.addFilesToWatch(fileToWarth, new Event().addField("test", "test"),FileWatcher.ONE_DAY , null, null);
+		//watcher.initialize();
+		for(File file : collection) {
+			logger.info(file.getAbsolutePath());
+		}
 
 
 	}

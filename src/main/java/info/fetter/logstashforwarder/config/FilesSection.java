@@ -19,6 +19,9 @@ package info.fetter.logstashforwarder.config;
 
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -31,7 +34,9 @@ public class FilesSection {
 	private Map<String,String> fields;
 	@JsonProperty("dead time")
 	private String deadTime = "24h";
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Multiline multiline;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Filter filter;
 
 	public List<String> getPaths() {
@@ -54,6 +59,7 @@ public class FilesSection {
 		return deadTime;
 	}
 
+	@JsonIgnore
 	public long getDeadTimeInSeconds() {
 		long deadTimeInSeconds = 0;
 		String remaining = deadTime;

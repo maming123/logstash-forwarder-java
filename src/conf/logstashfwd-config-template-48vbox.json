@@ -1,0 +1,102 @@
+{
+	"output": {
+		"kafka": {
+			"hosts": [
+				"18.5.202.48:59092",
+				"18.5.202.48:59093",
+				"18.5.202.48:59094"
+			],
+			"topic": "vbs3-logs",
+			"charset": "GBK",
+			"acks": "0",
+			"retries": 0,
+			"batch_size": 16384,
+			"linger_ms": 1000,
+			"buffer_memory": 33554432,
+			"output2kafka": 1
+		}
+	},
+	"files": [
+		{
+			"paths": [
+				"/home/dpsdep/log/${MMDD}/C01/dps-chain.log"
+			],
+			"fields": {
+				"file_type": "chain",
+				"system": "dps",
+				"node": "dps01"
+			},
+			"dead time": "10000h"
+		},
+		{
+			"paths": [
+				"/home/logdep/log/${MMDD}/frnt-chain.log"
+			],
+			"fields": {
+				"file_type": "chain",
+				"system": "frnt",
+				"node": "frnt1"
+			},
+			"dead time": "10000h"
+		},
+		{
+			"paths": [
+				"/home/dpsdep/log/${MMDD}/C01/tploader_*.log"
+			],
+			"fields": {
+				"file_type": "tplog",
+				"system": "dps",
+				"node": "dps01"
+			},
+			"dead time": "10000h"
+		},
+		{
+			"paths": [
+				"/home/dpsdep/log/${MMDD}/C01/monitor_*.log"
+			],
+			"fields": {
+				"file_type": "mlog",
+				"system": "dps",
+				"node": "dps01"
+			},
+			"dead time": "10000h"
+		},
+		{
+			"paths": [
+				"/home/dpsdep/log/${MMDD}/C01/${BRCCODE}/t_*.log"
+			],
+			"fields": {
+				"file_type": "tlog",
+				"system": "dps",
+				"node": "dps01"
+			},
+			"dead time": "10000h"
+		},
+		{
+			"paths": [
+				"/home/dpsdep/log/${MMDD}/C01/${BRCCODE}/zzzz/*.log"
+			],
+			"fields": {
+				"file_type": "zlog",
+				"system": "dps",
+				"node": "dps01"
+			},
+			"dead time": "10000h"
+		},
+		{
+			"paths": [
+				"/home/dpsdep/log/${MMDD}/C01/${BRCCODE}/d_*.log"
+			],
+			"fields": {
+				"file_type": "dlog",
+				"system": "dps",
+				"node": "dps01"
+			},
+			"multiline": { "pattern": "^PUB:|^SHARE:", "negate": "false", "what": "previous" },
+			"dead time": "10000h"
+		}
+	],
+	"settings": {
+		"cache_id_using_inode": true
+	}
+}
